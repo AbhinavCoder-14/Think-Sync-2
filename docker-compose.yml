@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: Think-Sync-2
+    restart: always
+    environment:
+      # These variables are used by the Postgres image to initialize the DB
+      POSTGRES_USER: quiz-admin-2
+      POSTGRES_PASSWORD: mypassword-2
+      POSTGRES_DB: quiz-admin-db-2
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
