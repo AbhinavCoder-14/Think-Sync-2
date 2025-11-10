@@ -6,7 +6,7 @@ import { generateKey } from "crypto";
 import { JWTPayload, SignJWT, importJWK } from 'jose';
 import { JWT } from "next-auth/jwt";
 
-import prisma from "@/app/lib/db";
+import { prisma } from '@/app/lib/db'
 
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto'
