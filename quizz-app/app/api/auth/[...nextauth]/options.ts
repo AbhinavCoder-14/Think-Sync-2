@@ -12,6 +12,7 @@ import { prisma } from "@/app/lib/db";
 
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
+import { signIn } from "next-auth/react";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -247,5 +248,8 @@ export const options: NextAuthOptions = {
 
       return session;
     },
+  },
+  pages: {
+    signIn: "/signin",
   },
 };

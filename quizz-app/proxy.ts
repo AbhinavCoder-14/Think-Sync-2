@@ -9,7 +9,7 @@ export default withAuth(
     console.log(req.nextauth.token)
     console.log(req.nextUrl.pathname)
 
-    if (req.nextUrl.pathname.startsWith("admin/create")&& (req.nextauth.token?.role !== "admin")){
+    if (req.nextUrl.pathname.startsWith("/admin/create")&& (req.nextauth.token?.role !== "admin")){
         return NextResponse.rewrite(
             new URL("/denied",req.url)
         )
@@ -20,12 +20,14 @@ export default withAuth(
         )
     }
 
+    
+
 
 
   },
   {
     callbacks: {
-      authorized: ({ token }) => token?.role === "admin",
+      authorized: ({ token }) => !!token,
     },
   },
 )

@@ -1,7 +1,8 @@
 "use client";
-import { useRouter } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 
 import { signIn,signOut,useSession } from "next-auth/react"
+import Link from "next/navigation";
 
 
 
@@ -12,7 +13,13 @@ export const AppBar = () =>{
     return(
         <div>
             <button  className="m-3 p-2 border-blue-900 border-2 cursor-pointer rounded-xl" onClick={()=>{
-                signIn();
+
+                if (!session) {
+                    signIn();
+                }
+                else{
+                    redirect("/admin/create")
+                }
             }}>Organise a Quiz</button>
 
             <button className="m-3 p-2 border-blue-900 border-2 cursor-pointer rounded-xl" onClick={()=>{

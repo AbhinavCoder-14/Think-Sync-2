@@ -1,20 +1,18 @@
 'use client';
 
-export default function Signin(){
+import { Input } from "@/components/ui/input"
+
+export default function Signin() {
 
 
+  return(
+    <>
 
-    return(
-        <>
-        
-        
-        <h1>This is signin page</h1>
-        
-        
-        
-        
-        
-        
-        </>   
-    )
+        <Input type="email" placeholder="Email" />
+        <Input type="password" placeholder="password" />
+
+    </>
+
+) 
+    
 }
