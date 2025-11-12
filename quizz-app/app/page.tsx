@@ -13,8 +13,7 @@ export default async function Home() {
   return (
     <>
     <AppBar/>
-
-
+    
     <h1>{JSON.stringify(session)}</h1>
     </>
   );
