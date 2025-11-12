@@ -1,5 +1,7 @@
 import type { NextAuthOptions, DefaultSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+
+import { GithubProfile } from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { generateKey } from "crypto";
 
@@ -65,7 +67,7 @@ async function validationUser(
         token: string;
       };
     }
-> {
+> { 
   if (process.env.LOCAL_DEVELOPMENT) {
     if (password === "1234") {
       return {
@@ -83,6 +85,15 @@ async function validationUser(
 export const options: NextAuthOptions = {
   providers: [
     GitHubProvider({
+        profile(profile:GithubProfile){
+          // console.log(profile)
+          return {
+            ...profile,
+            role: profile.role ?? "admin",
+            id:profile.id.toString(),
+            image:profile.avatar_url,
+          }
+        },
       clientId: process.env.GITHUB_ID as string,
       clientSecret: process.env.GITHUB_SECRET as string,
     }),
@@ -138,7 +149,7 @@ export const options: NextAuthOptions = {
             },
           });
 
-          if (userDb && userDb.password) {
+          if (userDb) {
             const checkPass = await bcrypt.compare(
               credentials.password,
               userDb.password

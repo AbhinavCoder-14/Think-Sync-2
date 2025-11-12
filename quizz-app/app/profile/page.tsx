@@ -8,8 +8,6 @@ async function Profile() {
 
         <><h1>this is the profile page</h1></>
     )
-    
-
 }
 
 

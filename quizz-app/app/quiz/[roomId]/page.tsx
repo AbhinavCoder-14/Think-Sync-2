@@ -11,4 +11,4 @@ async function Quiz({ params }: { params: { roomId: string } }) {
 
 
 
-export default quiz
+export default Quiz;
