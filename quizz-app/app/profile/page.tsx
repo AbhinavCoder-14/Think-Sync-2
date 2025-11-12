@@ -1,12 +1,22 @@
-
-'use client';
+import { getServerSession } from "next-auth/next"
+import { redirect } from "next/navigation"
 
 
 async function Profile() {
 
-    return(
+    // useSession for client side pages
+    const session = await getServerSession()
+    
 
-        <><h1>this is the profile page</h1></>
+    if(!session){
+        redirect('api/auth/signin?callbackUrl=/profile')
+    }
+
+
+
+
+    return(
+        <><h1>this is the profile page {session?.user.email}</h1></>
     )
 }
 

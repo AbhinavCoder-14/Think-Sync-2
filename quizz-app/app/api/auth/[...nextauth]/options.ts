@@ -134,83 +134,89 @@ export const options: NextAuthOptions = {
               };
             } else return null;
           }
-          const hashPassword = await bcrypt.hash(credentials.password, 10);
-          const userDb = await prisma.user.findFirst({
-            where: {
-              name: credentials.username,
-            },
 
-            select: {
-              password: true,
-              id: true,
-              name: true,
-              role: true,
-              email: true,
-            },
-          });
+          else{
 
-          if (userDb) {
-            const checkPass = await bcrypt.compare(
-              credentials.password,
-              userDb.password
-            );
-
-            if (checkPass) {
-              const jwt = await generateJWT({
-                id: userDb.id,
+            const hashPassword = await bcrypt.hash(credentials.password, 10);
+            const userDb = await prisma.user.findFirst({
+              where: {
+                name: credentials.username,
+              },
+  
+              select: {
+                password: true,
+                id: true,
+                name: true,
+                role: true,
+                email: true,
+              },
+            });
+  
+            if (userDb) {
+              const checkPass = await bcrypt.compare(
+                credentials.password,
+                userDb.password
+              );
+  
+              if (checkPass) {
+                const jwt = await generateJWT({
+                  id: userDb.id,
+                });
+  
+                await prisma.user.update({
+                  where: {
+                    id: userDb.id,
+                  },
+  
+                  data: {
+                    token: jwt,
+                  },
+                });
+                return {
+                  id: userDb.id,
+                  name: userDb.name,
+                  email: userDb.email,
+                  role:userDb.role,
+                  token: jwt,
+                };
+              } else {
+                console.log("Invalid password for user:", credentials.username);
+                return null;
+              }
+            } else {
+              console.log("not in db");
+  
+              const newUser = await prisma.user.create({
+                data: {
+                  name: credentials.username,
+                  password: hashPassword,
+                  role: credentials.role,
+                  email: credentials.username + "@thinksync.com",
+                },
               });
-
+  
+              const jwt = await generateJWT({
+                id: newUser.id,
+              });
+  
               await prisma.user.update({
                 where: {
-                  id: userDb.id,
+                  id: newUser.id,
                 },
-
                 data: {
                   token: jwt,
                 },
               });
+  
               return {
-                id: userDb.id,
-                name: userDb.name,
-                email: userDb.email,
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
                 token: jwt,
               };
-            } else {
-              console.log("Invalid password for user:", credentials.username);
-              return null;
             }
-          } else {
-            console.log("not in db");
 
-            const newUser = await prisma.user.create({
-              data: {
-                name: credentials.username,
-                password: hashPassword,
-                role: credentials.role,
-                email: credentials.username + "@gmail.com",
-              },
-            });
-
-            const jwt = await generateJWT({
-              id: newUser.id,
-            });
-
-            await prisma.user.update({
-              where: {
-                id: newUser.id,
-              },
-              data: {
-                token: jwt,
-              },
-            });
-
-            return {
-              id: newUser.id,
-              name: newUser.name,
-              email: newUser.email,
-              role: newUser.role,
-              token: jwt,
-            };
           }
         } catch (e: any) {
           console.log(e);
