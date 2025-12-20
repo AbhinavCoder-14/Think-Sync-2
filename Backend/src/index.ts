@@ -12,11 +12,17 @@ const port = process.env.port || 4000;
 
 app.use(cors())
 
+const server:http.Server = http.createServer(app)
 
-const io = IoManager.getSocketInstance()
+// Singleton instance is created for socket.io server
+const io = IoManager.getSocketInstance(server);
 
 
-const server = http.createServer(app)
+
+
+
+
+
 
 
 

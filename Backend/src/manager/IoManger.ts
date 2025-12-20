@@ -5,11 +5,11 @@ import type { Http2Server } from "http2";
 
 export class IoManager {
   work: string;
-  // private static server?: Http2Server;
+  private static server?: Http2Server;
   private static _io: Server;
   public static instance: IoManager;
 
-  private constructor(server: Http2Server) {
+  private constructor(server: http.Server) {
     this.work = "This is the class for singlton instance creation";
 
     IoManager._io = new Server(server, {
@@ -20,7 +20,7 @@ export class IoManager {
     });
   }
 
-  public static getSocketInstance(server?: Http2Server): IoManager {
+  public static getSocketInstance(server?: http.Server): IoManager {
     if (!this.instance) {
       if (!server) {
         throw new Error("server is not formed");
