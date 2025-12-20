@@ -68,7 +68,7 @@ async function validationUser(
         token: string;
       };
     }
-> { 
+> {
   if (process.env.LOCAL_DEVELOPMENT) {
     if (password === "1234") {
       return {
@@ -86,15 +86,15 @@ async function validationUser(
 export const options: NextAuthOptions = {
   providers: [
     GitHubProvider({
-        profile(profile:GithubProfile){
-          // console.log(profile)
-          return {
-            ...profile,
-            role: profile.role ?? "admin",
-            id:profile.id.toString(),
-            image:profile.avatar_url,
-          }
-        },
+      profile(profile: GithubProfile) {
+        // console.log(profile)
+        return {
+          ...profile,
+          role: profile.role ?? "admin",
+          id: profile.id.toString(),
+          image: profile.avatar_url,
+        };
+      },
       clientId: process.env.GITHUB_ID as string,
       clientSecret: process.env.GITHUB_SECRET as string,
     }),
@@ -134,16 +134,13 @@ export const options: NextAuthOptions = {
                 }),
               };
             } else return null;
-          }
-
-          else{
-
+          } else {
             const hashPassword = await bcrypt.hash(credentials.password, 10);
             const userDb = await prisma.user.findFirst({
               where: {
                 name: credentials.username,
               },
-  
+
               select: {
                 password: true,
                 id: true,
@@ -152,23 +149,23 @@ export const options: NextAuthOptions = {
                 email: true,
               },
             });
-  
+
             if (userDb) {
               const checkPass = await bcrypt.compare(
                 credentials.password,
                 userDb.password
               );
-  
+
               if (checkPass) {
                 const jwt = await generateJWT({
                   id: userDb.id,
                 });
-  
+
                 await prisma.user.update({
                   where: {
                     id: userDb.id,
                   },
-  
+
                   data: {
                     token: jwt,
                   },
@@ -177,7 +174,7 @@ export const options: NextAuthOptions = {
                   id: userDb.id,
                   name: userDb.name,
                   email: userDb.email,
-                  role:userDb.role,
+                  role: userDb.role,
                   token: jwt,
                 };
               } else {
@@ -186,7 +183,7 @@ export const options: NextAuthOptions = {
               }
             } else {
               console.log("not in db");
-  
+
               const newUser = await prisma.user.create({
                 data: {
                   name: credentials.username,
@@ -195,11 +192,11 @@ export const options: NextAuthOptions = {
                   email: credentials.username + "@thinksync.com",
                 },
               });
-  
+
               const jwt = await generateJWT({
                 id: newUser.id,
               });
-  
+
               await prisma.user.update({
                 where: {
                   id: newUser.id,
@@ -208,7 +205,7 @@ export const options: NextAuthOptions = {
                   token: jwt,
                 },
               });
-  
+
               return {
                 id: newUser.id,
                 name: newUser.name,
@@ -217,7 +214,6 @@ export const options: NextAuthOptions = {
                 token: jwt,
               };
             }
-
           }
         } catch (e: any) {
           console.log(e);
@@ -248,8 +244,5 @@ export const options: NextAuthOptions = {
 
       return session;
     },
-  },
-  pages: {
-    signIn: "/signin",
   },
 };
