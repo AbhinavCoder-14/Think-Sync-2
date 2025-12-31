@@ -1,11 +1,11 @@
 import { Server } from "socket.io";
 import http from "http";
-import { stringify } from "querystring";
+
 import type { Http2Server } from "http2";
 
 export class IoManager {
   work: string;
-  private static server?: Http2Server;
+  private static server?: http.Server;
   private static _io: Server;
   public static instance: IoManager;
 
@@ -18,6 +18,22 @@ export class IoManager {
         methods: ["GET", "POST"],
       },
     });
+
+    IoManager._io.on("connection",(socket)=>{
+      console.log("User is connected",socket.id)
+      socket.on("message",(message)=>{
+        message = socket.id+'-'+message;
+        IoManager._io.emit("message",{
+          msg:message,
+          timeStamp: new Date(),
+        })
+      })
+
+
+      socket.on("disconect",()=>{
+        console.log("user disconected",socket.id)
+      })
+    })
   }
 
   public static getSocketInstance(server?: http.Server): IoManager {
@@ -34,4 +50,7 @@ export class IoManager {
     return IoManager._io;
   }
 }
+
+
+
 
