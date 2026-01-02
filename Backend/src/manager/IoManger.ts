@@ -1,8 +1,6 @@
 import { Server } from "socket.io";
 import http from "http";
 
-import type { Http2Server } from "http2";
-
 export class IoManager {
   work: string;
   private static server?: http.Server;
@@ -22,7 +20,7 @@ export class IoManager {
     IoManager._io.on("connection",(socket)=>{
       console.log("User is connected",socket.id)
       socket.on("message",(message)=>{
-        message = socket.id+'-'+message;
+        message = socket.id+'-'+message.message;
         IoManager._io.emit("message",{
           msg:message,
           timeStamp: new Date(),
