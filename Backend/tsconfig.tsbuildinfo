@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/quiz.ts","./src/manager/iomanger.ts","./src/manager/quizmanager.ts","./src/manager/usermanager.ts","./src/manager/adminmanager.ts"],"errors":true,"version":"5.9.3"}
