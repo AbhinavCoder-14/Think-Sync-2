@@ -27,12 +27,15 @@ interface Problem {
     }[];
 };
 
+type currentState = "NOT STARTED" | "STARTED" | "CHANGE_PROBLEM" | "LEADERBOARD" |"QUIZ_ENDED";
+
 export class Quiz{
     public roomId:string;
     private hasStarted:boolean;
     private users:User[];
     private problems:Problem[];
     private activeProblem:number
+    private currentState:string;
 
 
     constructor(roomId:string){
@@ -41,6 +44,7 @@ export class Quiz{
         this.users = [];
         this.problems = [];
         this.activeProblem = 0
+        this.currentState = "NOT STARTED"
     }
 
     private randomUUId(){
@@ -49,7 +53,7 @@ export class Quiz{
 
     }
 
-    
+
     public addUser(name:string){
         const id = this.randomUUId()
         this.users.push({
@@ -61,13 +65,13 @@ export class Quiz{
 
     public start(){
         this.hasStarted = true;
-
+        this.currentState = "CHANGE_PROBLEM";
         this.problems[this.activeProblem]?.startTime == new Date().getTime()
         const io = IoManager.getSocketInstance().io
         io.to(this.roomId).emit("CHANGE_PROBLEM",{
             problems:this.problems[this.activeProblem]
         })
-
+ 
         setTimeout(() => {
             this.sendLeaderBoard();
         }, TIME_DURATION_SEC*1000);
@@ -75,15 +79,11 @@ export class Quiz{
 
 
     public sendLeaderBoard(){
-        const getLeaderboard = this.users.sort((a,b)=>{
-            if (a.points>b.points){
-                return -1
-            }
-            else{
-                return 1
-            }
+        this.currentState = "LEADERBOARD";
+        const getLeaderboard = this.users.sort((a,b)=> (a.points< b.points) ? 1:-1).splice(0,20)
+        IoManager.getSocketInstance().io.to(this.roomId).emit("LEADERBOARD",{
+            getLeaderboard
         })
-
         return getLeaderboard;
     }
 
@@ -93,21 +93,19 @@ export class Quiz{
     public next(){
         const io = IoManager.getSocketInstance().io
         this.activeProblem++
+        this.currentState = "CHANGE_PROBLEM" 
         if (this.problems[this.activeProblem]){
             io.to(this.roomId).emit("CHANGE_PROBLEM",{
                 problem: this.problems[this.activeProblem]
             })
+
+            setTimeout(()=>this.sendLeaderBoard,TIME_DURATION_SEC*1000)
         }
         else{
-            io.to(this.roomId).emit("QUIZ_END",{
-                // leaderboard will be send there
-            })
+            this.currentState = "QUIZ_ENDED"
+            this.sendLeaderBoard()
         }
     }
-
-
-
-
 
 
     public submit(userId:string,problemId:string,submission:AllowedSubmission){
@@ -139,6 +137,42 @@ export class Quiz{
             }
 
         }
+
+    }
+
+
+    public currentStateQuiz(){
+
+        if(this.currentState==="NOT_STARTED"){
+            return "NOT_STARTED";
+        }
+
+        if(this.currentState==="STARTED"){
+            return "STARTED";
+        }
+        if(this.currentState==="CHANGE_PROBLEM"){
+            const problem = this.problems[this.activeProblem]
+            return {type:"CHANGE_PROBLEM",
+                problem:problem
+            };
+        }
+
+        if(this.currentState==="LEADERBOARD"){
+            return{ type:"LEADERBOARD",
+                leaderboard:this.sendLeaderBoard()
+            };
+        }
+
+        if (this.currentState==="QUIZ_ENDED"){
+            return {type:"QUIZ_ENDED",
+                leaderboard:this.sendLeaderBoard()
+            };
+        }
+
+
+
+
+
 
     }
 
