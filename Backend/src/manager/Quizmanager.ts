@@ -2,6 +2,24 @@ import { Quiz } from "../quiz.js"
 import { IoManager } from "./IoManger.js";
 
 
+type AllowedSubmission = 0| 1 |2 |3;
+
+
+export interface Problem {
+  problemId: string;
+  title: string;
+  image: string;
+  answer: AllowedSubmission;
+  option: {
+    id: number;
+    title: string;
+  };
+}
+
+
+let globalProblemIndex = 0
+
+
 export class QuizManager{
     private quizes:Quiz[];
 
@@ -18,16 +36,23 @@ export class QuizManager{
             return
         }
         quiz.start();
-        
     }
+
 
     public next(roomId:string){
         const io = IoManager.getSocketInstance().io
-        io.to(roomId).emit({
-            type:"Start_Room" 
-        })
+        const quiz = this.getQuiz(roomId)
 
+        if(quiz){
+            quiz.next()
+        }
+    }
 
+    public currentStateQuiz(roomId:string){
+        const quiz = this.getQuiz(roomId);
+        if(quiz){
+            return quiz.currentStateQuiz();
+        }
 
     }
 
@@ -49,13 +74,30 @@ export class QuizManager{
 
     }
 
-// i think this will go to quiz.ts
+    // i think this will go to quiz.ts
    public addQuizbyAdmin(roomId:string){
         if (this.getQuiz(roomId)){
             return;
         }
         const quiz = new Quiz(roomId)
         this.quizes.push(quiz)
+    }
+
+
+    public addProblem(roomId:string,problem:Problem){
+        const quiz = this.getQuiz(roomId)
+        if(!quiz){
+            return null;
+        }
+
+        quiz.addProblem({
+            ...problem,
+            id:(globalProblemIndex++).toString(),
+            startTime:null,
+            submission:[]
+        })
+
+
     }
 
 }
