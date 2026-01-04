@@ -58,18 +58,21 @@ export class QuizManager{
 
 
     public addUser(name:string,roomId:string){
+        if(this.getQuiz(roomId)===null){
+            return "Room Id is not found"
+        }
         this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
     }
     // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
     public getQuiz(roomId:string){
         return this.quizes.find((x)=>{
             x.roomId === roomId
-        }) ?? null 
+        }) ?? null
 
         // return array of unique roomId quiz array
     }
 
-    public submit(roomId:string,problemId:string,submission:0|1|2|3){
+    public submit(userId:string,roomId:string,problemId:string,submission:AllowedSubmission){
         this.getQuiz(roomId)?.submit(roomId,problemId,submission)
 
     }

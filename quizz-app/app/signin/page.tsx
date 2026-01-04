@@ -7,7 +7,6 @@ export default function Signin() {
 
   return(
     <>
-
         <Input type="email" placeholder="Email" />
         <Input type="password" placeholder="password" />
 

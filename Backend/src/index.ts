@@ -4,7 +4,7 @@ import cors from "cors"
 import http from 'http';
 import crypto from 'crypto';
 
-import { IoManager } from './manager/IoManger.js';
+import { IoManager } from '../dist/manager/IoManger.js';
 
 
 
@@ -45,11 +45,6 @@ app.post("/api/create_room",(req,res)=>{
 
 
     res.json({"roomId":roomId})
-
-
-
-
-
 })
 
 

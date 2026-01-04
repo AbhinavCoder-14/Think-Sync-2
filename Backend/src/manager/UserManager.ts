@@ -62,7 +62,7 @@ export class UserManager {
         console.error("issue while sumiting the answer");
         return;
       }
-      this.quizManager.submit(roomId, problemId, submission);
+      this.quizManager.submit(userId,roomId, problemId, submission);
     });
 
     socket.on("Admin join",(data)=>{
