@@ -1,4 +1,3 @@
-import { stringify } from "node:querystring";
 import { Socket } from "socket.io";
 import { QuizManager } from "./Quizmanager.js";
 
@@ -8,38 +7,63 @@ interface User {
   socket: Socket;
 }
 
-const ADMIN_PASS = "1234"
+const ADMIN_ROOM_KEY = "1234";
 
 export class UserManager {
   public users: User[];
+  private isAdmin: boolean;
 
   private quizManager;
 
   constructor() {
     this.users = [];
     this.quizManager = new QuizManager();
+    this.isAdmin = false;
   }
 
-  addUser(roomId: string, name: string, socket: Socket) {
-    this.users.push({
-      name,
-      roomId,
-      socket,
+  addUser(socket: Socket) {
+    this.UserOperations(socket);
+  }
+
+  addAdminInit(socket: Socket) {
+    socket.on("join_admin", (data) => {
+      if (data.password !== ADMIN_ROOM_KEY) {
+        return;
+      }
+
+      this.isAdmin = true;
+      console.log("admin connection init");
+
     });
-    this.createHandlersForOtherUpdation(roomId, name, socket);
+    
+      socket.on("create_quiz", (data) => {
+        if(!this.isAdmin){
+          return "unautherized for this event access"
+        }
+        this.quizManager.addQuizbyAdmin(data.roomId);
+        console.log("create quiz called ", data.roomId);
+      });
+
+      socket.on("add_problems", (data) => {
+        if(!this.isAdmin){
+          return "unautherized for this event access"
+        }
+        this.quizManager.addProblem(data.roomId, data.problem);
+      });
+
+      socket.on("next", (data) => {
+        if(!this.isAdmin){
+          return "unautherized for this event access"
+        }
+        this.quizManager.next(data.roomId);
+      });
+
+
+
+
   }
 
-
-
-
-
-
-
-
-
-  private createHandlersForOtherUpdation(
-    roomId: string,
-    name: string,
+  private UserOperations(
     socket: Socket
   ) {
     socket.on("join", (data) => {
@@ -52,6 +76,7 @@ export class UserManager {
       const userId = data.userId;
       const problemId = data.problemId;
       const submission = data.submission;
+      const roomId = data.roomId;
 
       if (
         submission != 1 ||
@@ -62,26 +87,27 @@ export class UserManager {
         console.error("issue while sumiting the answer");
         return;
       }
-      this.quizManager.submit(userId,roomId, problemId, submission);
+      this.quizManager.submit(userId, roomId, problemId, submission);
     });
 
-    socket.on("Admin join",(data)=>{
-      if (data.password!==ADMIN_PASS){
-        return;
-      }
+    // socket.on("join_admin",(data)=>{
+    //   if (data.password!==ADMIN_ROOM_KEY){
+    //     return;
+    //   }
+    //   console.log("admin connection init")
 
-      socket.on("create_quiz",(data)=>{
-        this.quizManager.addQuizbyAdmin(data.roomId)
-      })
+    //   socket.on("create_quiz",(data)=>{
+    //     this.quizManager.addQuizbyAdmin(data.roomId)
+    //     console.log("create quiz called ", data.roomId)
+    //   })
 
-      socket.on("add_problems",(data)=>{
-        this.quizManager.addProblem(data.roomId,data.problem)
-      })
+    //   socket.on("add_problems",(data)=>{
+    //     this.quizManager.addProblem(data.roomId,data.problem)
+    //   })
 
-      socket.on("next",(data)=>{
-        this.quizManager.next(data.roomId)
-      })
-    })
-
+    //   socket.on("next",(data)=>{
+    //     this.quizManager.next(data.roomId)
+    //   })
+    // })
   }
 }

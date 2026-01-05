@@ -5,6 +5,8 @@ import http from 'http';
 import crypto from 'crypto';
 
 import { IoManager } from '../dist/manager/IoManger.js';
+import { UserManager } from './manager/UserManager.js';
+import { Socket } from 'socket.io';
 
 
 
@@ -18,7 +20,51 @@ app.use(express.json())
 const server:http.Server = http.createServer(app)
 
 // Singleton instance is created for socket.io server
-const io = IoManager.getSocketInstance(server);
+IoManager.getSocketInstance(server);
+const userManager = new UserManager()
+
+
+const io = IoManager.getSocketInstance().io
+io.on("connection",(socket:Socket)=>{
+      console.log("User is connected",socket.id)
+      socket.on("message",(message)=>{
+        message = socket.id+'-'+message.message;
+
+        // this io emit use for broadcasting the message to all the users
+        io.emit("message",{
+          msg:message,
+          timeStamp: new Date(),
+        })
+      })
+
+
+
+
+      userManager.addAdminInit(socket)
+      userManager.addUser(socket)
+
+
+      socket.on("disconect",()=>{
+        console.log("user disconected",socket.id)
+      })
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.post("/api/get_instance",(req,res)=>{

@@ -17,21 +17,6 @@ export class IoManager {
       },
     });
 
-    IoManager._io.on("connection",(socket)=>{
-      console.log("User is connected",socket.id)
-      socket.on("message",(message)=>{
-        message = socket.id+'-'+message.message;
-        IoManager._io.emit("message",{
-          msg:message,
-          timeStamp: new Date(),
-        })
-      })
-
-
-      socket.on("disconect",()=>{
-        console.log("user disconected",socket.id)
-      })
-    })
   }
 
   public static getSocketInstance(server?: http.Server): IoManager {
