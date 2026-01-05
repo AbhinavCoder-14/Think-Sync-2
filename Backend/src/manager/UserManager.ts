@@ -10,13 +10,13 @@ interface User {
 const ADMIN_ROOM_KEY = "1234";
 
 export class UserManager {
-  public users: User[];
+  public users: User[]; // useless
   private isAdmin: boolean;
 
   private quizManager;
 
   constructor() {
-    this.users = [];
+    this.users = []; // useless
     this.quizManager = new QuizManager();
     this.isAdmin = false;
   }
@@ -49,6 +49,7 @@ export class UserManager {
           return "unautherized for this event access"
         }
         this.quizManager.addProblem(data.roomId, data.problem);
+        console.log(`Admin Added in ${data.roomId} ---- ${data.problem}`)
       });
 
       socket.on("next", (data) => {
@@ -58,9 +59,6 @@ export class UserManager {
         this.quizManager.next(data.roomId);
       });
 
-
-
-
   }
 
   private UserOperations(
@@ -68,9 +66,14 @@ export class UserManager {
   ) {
     socket.on("join", (data) => {
       const userId = this.quizManager.addUser(data.name, data.roomId);
-      socket.emit("userId", {
-        userId,
-      });
+
+      if (userId){
+        socket.emit("initilization", {
+          userId,
+          state:this.quizManager.currentStateQuiz(data.roomId)
+        });
+        socket.join(data.roomId)
+      }
     });
     socket.on("submit", (data) => {
       const userId = data.userId;

@@ -15,6 +15,54 @@ interface session{
     exp: number;
     jti: string;}
 
+export interface Option {
+  id: string;
+  title: string;
+}
+
+export interface Problem {
+  title: string;
+  image: string;
+  answer: string; // Matches the Option ID
+  options: Option[];
+}
+
+export const dummyProblems: Problem[] = [
+  {
+    title: "What is the output of '2' + 2 in JavaScript?",
+    image: "https://dummyimage.com/600x400/000/fff&text=JS+Question",
+    answer: "opt_2", 
+    options: [
+      { id: "opt_1", title: "4" },
+      { id: "opt_2", title: "22" }, // Correct Answer
+      { id: "opt_3", title: "NaN" },
+      { id: "opt_4", title: "TypeError" },
+    ],
+  },
+  {
+    title: "Which keyword is used to define a function in Python?",
+    image: "https://dummyimage.com/600x400/000/fff&text=Python+Code",
+    answer: "opt_1",
+    options: [
+      { id: "opt_1", title: "def" }, // Correct Answer
+      { id: "opt_2", title: "function" },
+      { id: "opt_3", title: "func" },
+      { id: "opt_4", title: "define" },
+    ],
+  },
+  {
+    title: "What is the time complexity of accessing an array element by index?",
+    image: "https://dummyimage.com/600x400/000/fff&text=Big+O",
+    answer: "opt_3",
+    options: [
+      { id: "opt_1", title: "O(n)" },
+      { id: "opt_2", title: "O(log n)" },
+      { id: "opt_3", title: "O(1)" }, // Correct Answer
+      { id: "opt_4", title: "O(n log n)" },
+    ],
+  },
+];
+
 export default function Create() {
     const socket:any = useSocket()
 
@@ -32,13 +80,18 @@ export default function Create() {
                 socket.emit("create_quiz",{
                     roomId:roomId
                 })
+                // Hardcoded the problem rn
+                
+                socket.emit("add_problems",{
+                    roomId:roomId,
+                    problem:JSON.stringify(dummyProblems)
+                })
             }
-
-        
-
         }
 
         // TODO: verify that the user is autherize or not to create room 
+        // -- done
+
     } 
 
 

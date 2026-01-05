@@ -6,7 +6,7 @@ type AllowedSubmission = 0| 1 |2 |3;
 
 
 export interface Problem {
-  problemId: string;
+
   title: string;
   image: string;
   answer: AllowedSubmission;
@@ -59,7 +59,7 @@ export class QuizManager{
 
     public addUser(name:string,roomId:string){
         if(this.getQuiz(roomId)===null){
-            return "Room Id is not found"
+            return null
         }
         this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
     }
@@ -95,7 +95,7 @@ export class QuizManager{
 
         quiz.addProblem({
             ...problem,
-            id:(globalProblemIndex++).toString(),
+            problemId:(globalProblemIndex++).toString(),
             startTime:null,
             submission:[]
         })
