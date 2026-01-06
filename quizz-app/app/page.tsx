@@ -24,19 +24,18 @@ export default async function Home() {
 
       <NavBar/>
 
-      <h1>{JSON.stringify(session)}</h1>
         <AppBar/>
         <div style={{ width: '100%', height: '100vh', position: 'absolute', top:"0px",zIndex:"-100" }}>
-      <PixelSnow 
-        color="#ffffff"
-        flakeSize={0.01}
-        minFlakeSize={1.25}
-        pixelResolution={200}
-        speed={1.25}
-        density={0.3}
-        direction={125}
-        brightness={1}
-        />
+        <PixelSnow
+    flakeSize={0.008}
+    pixelResolution={250}
+    speed={2.1}
+    depthFade={11.5}
+    farPlane={23}
+    brightness={1.6}
+    density={0.2}
+    direction={140}
+  />
       </div>
 
 

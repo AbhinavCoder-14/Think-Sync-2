@@ -3,6 +3,9 @@ import { redirect, useRouter } from "next/navigation"
 
 import { signIn,signOut,useSession } from "next-auth/react"
 import Link from "next/navigation";
+import { Button } from "./ui/button";
+
+
 
 
 
@@ -11,8 +14,8 @@ export const AppBar = () =>{
     const session = useSession();
 
     return(
-        <div className="flex flex-col justify-center align-middle m-auto h-[95vh] border-2 border-rose-50">
-            <button  className="m-3 p-2 border-blue-900 border-2 cursor-pointer rounded-xl w-100" onClick={()=>{
+        <div className="flex flex-col justify-center align-middle m-auto h-[95vh]">
+            <Button  className="m-3 p-2 cursor-pointer rounded-xl w-100" onClick={()=>{
 
                 if (!session) {
                     signIn();
@@ -20,7 +23,7 @@ export const AppBar = () =>{
                 else{
                     redirect("/admin/create")
                 }
-            }}>Organise a Quiz</button>
+            }}>Organise a Quiz</Button>
 
             <button className="m-3 p-2 border-blue-900 border-2 cursor-pointer rounded-xl w-100 " onClick={()=>{
             signOut();
