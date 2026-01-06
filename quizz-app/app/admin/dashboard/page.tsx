@@ -3,6 +3,6 @@
 
 export default function Dashboard()  {
     return (
-        <><h1>This is admin Dashboard page</h1></>
+        <><h1>This is Admin Dashboard page</h1></>
     )
 }

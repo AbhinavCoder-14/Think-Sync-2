@@ -1,5 +1,5 @@
 import { Quiz } from "../quiz.js"
-import { IoManager } from "./IoManger.js";
+import { IoManager } from "./IoInit.js";
 
 
 type AllowedSubmission = 0| 1 |2 |3;

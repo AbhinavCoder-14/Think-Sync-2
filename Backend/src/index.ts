@@ -4,8 +4,8 @@ import cors from "cors"
 import http from 'http';
 import crypto from 'crypto';
 
-import { IoManager } from '../dist/manager/IoManger.js';
-import { UserManager } from './manager/UserManager.js';
+import { IoManager } from './controllers/IoInit.js';
+import { UserManager } from './controllers/UserController.js';
 import { Socket } from 'socket.io';
 
 

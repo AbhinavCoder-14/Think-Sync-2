@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { IoManager } from "./manager/IoManger.js";
+import { IoManager } from "./controllers/IoInit.js";
 
 export interface User {
   name: string;

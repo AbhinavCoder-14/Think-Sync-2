@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { QuizManager } from "./Quizmanager.js";
+import { QuizManager } from "./Quizcontroller.js";
 
 interface User {
   roomId: string;
