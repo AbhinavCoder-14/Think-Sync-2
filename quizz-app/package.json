@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
+    "framer-motion": "^12.24.7",
     "geist": "^1.5.1",
     "lucide-react": "^0.553.0",
     "next": "16.0.1",

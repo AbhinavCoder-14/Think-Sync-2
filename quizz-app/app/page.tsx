@@ -6,6 +6,7 @@ import PixelSnow from '../components/PixelSnow';
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
 import NavBar from "@/components/navBar";
+import WaitingRoom from "@/components/WaitingRoom";
 
 
 export default async function Home() {
@@ -19,7 +20,7 @@ export default async function Home() {
     
   return (
     <>
-
+{/* 
     <div>
 
       <NavBar/>
@@ -40,7 +41,9 @@ export default async function Home() {
 
 
 
-    </div>
+    </div> */}
+
+    <WaitingRoom roomId="asldkfj" players={["12","12"]}/>
     
 
 
