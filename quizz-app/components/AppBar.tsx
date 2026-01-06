@@ -14,22 +14,42 @@ export const AppBar = () =>{
     const session = useSession();
 
     return(
-        <div className="flex flex-col justify-center align-middle m-auto h-[95vh]">
-            <Button  className="m-3 p-2 cursor-pointer rounded-xl w-100" onClick={()=>{
+        <div className="flex flex-col">
 
-                if (!session) {
-                    signIn();
-                }
-                else{
-                    redirect("/admin/create")
-                }
-            }}>Organise a Quiz</Button>
 
-            <button className="m-3 p-2 border-blue-900 border-2 cursor-pointer rounded-xl w-100 " onClick={()=>{
-            signOut();
-            }}>Logout</button>
 
-            {JSON.stringify(session.data?.user)}
+
+
+            <div className="flex flex-col justify-center align-middle m-auto h-[100vh]  w-[50%]">
+
+                <div className="font-bold text-4xl text-center">
+
+                    <h1>The fastest way to test your brain and sync up!</h1>
+                </div>
+
+                <div className="flex justify-center align-middle my-10">
+
+                    <Button  className="m-3 p-2 cursor-pointer rounded-4xl w-45 font-normal" onClick={()=>{
+
+                        if (!session) {
+                            signIn();
+                        }
+                        else{
+                            redirect("/admin/create")
+                        }
+                    }}>Organise a Quiz</Button>
+
+                    <Button className="m-3 p-2 border-2 cursor-pointer rounded-4xl w-45  font-normal" onClick={()=>{
+
+                        redirect("/UserJoin")
+                    }}>Join Quiz</Button>
+
+                    {/* {JSON.stringify(session.data?.user)} */}
+
+                </div>
+
+            </div>
+
         </div>
     )
 }
