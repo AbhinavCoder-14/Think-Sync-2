@@ -59,7 +59,7 @@ export class QuizManager{
 
     public addUser(name:string,roomId:string){
         if(this.getQuiz(roomId)===null){
-            return null
+            return "room not found!"
         }
         this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
     }
@@ -102,5 +102,14 @@ export class QuizManager{
 
 
     }
+    // i'don't think user_count found is need to get the user count in perticular room
+    // public user_count(roomId:string){
+    //     const quiz = this.getQuiz(roomId)
+
+    //     const user_count = quiz?.user_count()
+
+    //     return user_count;
+
+    // }
 
 }

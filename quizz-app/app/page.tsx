@@ -20,7 +20,7 @@ export default async function Home() {
     
   return (
     <>
-{/* 
+
     <div>
 
       <NavBar/>
@@ -41,9 +41,9 @@ export default async function Home() {
 
 
 
-    </div> */}
+    </div>
 
-    <WaitingRoom roomId="asldkfj" players={["12","12"]}/>
+    {/* <WaitingRoom roomId="asldkfj" players={["12","12"]}/> */}
     
 
 

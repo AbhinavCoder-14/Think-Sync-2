@@ -1,10 +1,19 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Loader2 } from 'lucide-react';
 import PixelSnow from '@/components/PixelSnow';
 
-export default function WaitingRoom({ roomId, players }: { roomId: string, players: any[] }) {
+export default function WaitingRoom({ roomId, players,count }: { roomId: string, players: any[],count:Number }) {
+  
+  const [userCount,setuserCount] = useState(count)
+  
+  useEffect(()=>{
+
+    setuserCount(count)
+
+  },[count])
+
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
       <PixelSnow density={0.1} speed={0.5} variant="snowflake" className="z-0" />
@@ -41,7 +50,7 @@ export default function WaitingRoom({ roomId, players }: { roomId: string, playe
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users size={18} />
-            <span>{players.length} players joined</span>
+            <span>{userCount.toString()} players joined</span>
           </div>
         </div>
       </motion.div>

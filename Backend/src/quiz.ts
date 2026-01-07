@@ -151,6 +151,16 @@ export class Quiz {
     }
   }
 
+  public user_count(){
+    const io = IoManager.getSocketInstance().io;
+
+    io.to(this.roomId).emit("user_count",{
+      count:io.sockets.adapter.rooms.get(this.roomId)?.size || 0
+    })
+
+
+  }
+
   public currentStateQuiz() {
     if (this.currentState === "NOT STARTED") {
       return {

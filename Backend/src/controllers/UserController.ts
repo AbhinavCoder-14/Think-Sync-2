@@ -66,8 +66,9 @@ export class UserManager {
   ) {
     socket.on("join", (data) => {
       const userId = this.quizManager.addUser(data.name, data.roomId);
-
+      
       if (userId){
+        console.log("joinig request")
         socket.emit("initilization", {
           userId,
           state:this.quizManager.currentStateQuiz(data.roomId)
@@ -75,6 +76,10 @@ export class UserManager {
         socket.join(data.roomId)
       }
     });
+    // socket.on("user_count",(data)=>{
+    //   const user_count = this.quizManager.user_count(data.roomId)
+    // })
+
     socket.on("submit", (data) => {
       const userId = data.userId;
       const problemId = data.problemId;
