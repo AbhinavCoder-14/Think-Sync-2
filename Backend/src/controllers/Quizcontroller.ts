@@ -51,6 +51,7 @@ export class QuizManager{
     public currentStateQuiz(roomId:string){
         const quiz = this.getQuiz(roomId);
         if(quiz){
+            
             return quiz.currentStateQuiz();
         }
 
@@ -71,14 +72,14 @@ export class QuizManager{
     // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
     public getQuiz(roomId:string){
         return this.quizes.find((x)=>{
-            x.roomId === roomId
+            return x.roomId === roomId
         }) ?? null
 
         // return array of unique roomId quiz array
     }
 
     public submit(userId:string,roomId:string,problemId:string,submission:AllowedSubmission){
-        this.getQuiz(roomId)?.submit(roomId,problemId,submission)
+        this.getQuiz(roomId)?.submit(userId,problemId,submission)
 
     }
  

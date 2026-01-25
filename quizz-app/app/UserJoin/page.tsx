@@ -5,23 +5,31 @@ import { Input } from "@/components/ui/input"
 import { useSocket } from "../context/SocketContext"
 import WaitingRoom from "@/components/WaitingRoom"
 
+
+
 export default function UserJoin() {
     const socket: any = useSocket()
     const [roomId, setRoomId] = useState<string>("")
     const [username, setUsername] = useState<string>("")
     const [isJoined, setIsJoined] = useState<boolean>(false) // Changed convention to camelCase
-    const [userId, setUserId] = useState<string>("")
+    const [userId1, setUserId1] = useState<string>("")
     const [userCount, setUserCount] = useState<number>(0)
 
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
     useEffect(() => {
-        if (!socket) return;
+        if(!socket){
+            console.log("Entered in handle join useeffet but socket is null")
+            return;
+        }
 
+        
+        console.log("enterd in the handle join useEffect")
         socket.on("initilization", (data: any) => {
+
             if (data.userId) {
-                setUserId(data.userId)
+                setUserId1(data.userId)
                 setIsJoined(true)
 
                 if (data.state && data.state.type) {
@@ -44,7 +52,7 @@ export default function UserJoin() {
     }, [socket])
 
     const handleJoin = () => {
-        if (!roomId || !username) {
+        if (!roomId || !username || !socket) {
             alert("Please enter both name and room ID");
             return;
         }
@@ -53,9 +61,23 @@ export default function UserJoin() {
             roomId: roomId
         })
 
-        socket.on("user_count", (data: any) => {
-            console.log(data.count)
-        })
+        setIsJoined(true)
+        
+        // socket.on("initilization", (data: any) => {
+        //     console.log("enterd in the handle join")
+        //     if (data.userId) {
+        //         setUserId1(data.userId)
+        //         setIsJoined(true)
+
+        //         if (data.state && data.state.type) {
+        //             setCurrentState(data.state.type)
+        //         }
+        //     }
+        // })
+
+        // socket.on("user_count", (data: any) => {
+        //     console.log(data.count)
+        // })
     }
 
     if (isJoined) {
