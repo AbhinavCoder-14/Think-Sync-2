@@ -56,6 +56,10 @@ export class QuizManager{
 
     }
 
+    // public user_count(roomId:string){
+    //     const quiz
+    // }
+
 
     public addUser(name:string,roomId:string){
         if(this.getQuiz(roomId)===null){

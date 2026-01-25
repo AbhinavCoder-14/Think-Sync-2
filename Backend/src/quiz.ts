@@ -54,6 +54,7 @@ export class Quiz {
   private randomUUId() {
     let userId = crypto.randomUUID();
     console.log(userId);
+    return userId;
   }
 
   public addUser(name: string) {
@@ -63,6 +64,7 @@ export class Quiz {
       id,
       points: 0,
     });
+    this.user_count()
 
     return id;
   }
@@ -152,13 +154,12 @@ export class Quiz {
   }
 
   public user_count(){
+    console.log("entered in user_count")
     const io = IoManager.getSocketInstance().io;
-
     io.to(this.roomId).emit("user_count",{
-      count:io.sockets.adapter.rooms.get(this.roomId)?.size || 0
+      count:this.users.length
     })
-
-
+    // console.log(io.sockets.adapter.rooms.get(this.roomId)?.size)
   }
 
   public currentStateQuiz() {

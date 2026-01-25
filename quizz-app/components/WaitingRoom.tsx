@@ -4,21 +4,32 @@ import { motion } from 'framer-motion';
 import { Users, Loader2 } from 'lucide-react';
 import PixelSnow from '@/components/PixelSnow';
 
-export default function WaitingRoom({ roomId, players,count }: { roomId: string, players: any[],count:Number }) {
-  
-  const [userCount,setuserCount] = useState(count)
-  
-  useEffect(()=>{
+import { useSocket } from '@/app/context/SocketContext';
 
-    setuserCount(count)
+export default function WaitingRoom({ roomId, players }: { roomId: string, players: any[] }) {
 
-  },[count])
+  const socket: any = useSocket()
+
+  const [userCount, setuserCount] = useState(0);
+
+
+  useEffect(() => {
+    socket.on("user_count", (data: any) => {
+      setuserCount(data.count)
+      console.log(data.count)
+    })
+    return () => {
+      socket.off("user_count");
+    }
+  },[])
+
+
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
       <PixelSnow density={0.1} speed={0.5} variant="snowflake" className="z-0" />
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="z-10 w-full max-w-2xl p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl"

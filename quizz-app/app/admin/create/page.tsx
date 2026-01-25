@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useSocket } from "@/app/context/SocketContext";
 import { Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 interface session{
     name: string;
@@ -65,6 +66,7 @@ export const dummyProblems: Problem[] = [
 
 export default function Create() {
     const socket:any = useSocket()
+    const [roomId , setRoomId] = useState<string | null>();
 
     const { data: session } = useSession()
     
@@ -80,6 +82,8 @@ export default function Create() {
                 socket.emit("create_quiz",{
                     roomId:roomId
                 })
+
+                setRoomId(roomId)
                 // Hardcoded the problem rn
                 
                 socket.emit("add_problems",{
@@ -92,7 +96,18 @@ export default function Create() {
         // TODO: verify that the user is autherize or not to create room 
         // -- done
 
-    } 
+    }
+    if (roomId){
+      return(
+        <>
+        
+        your room is created the room Id is  {roomId}
+        
+        </>
+      )
+    }
+
+
 
 
     return (
@@ -102,10 +117,6 @@ export default function Create() {
         <Button className="cursor-pointer" onClick={()=>{createRoom()}} size="lg">Create Room</Button>
         <h1>Right now i have hardcoded the quiz questions</h1>
         </>
-
-        
-
-
     )
 
 }
