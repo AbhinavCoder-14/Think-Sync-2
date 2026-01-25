@@ -58,6 +58,7 @@ export class Quiz {
   }
 
   public addUser(name: string) {
+    console.log("enterd in this quiz.ts")
     const id = this.randomUUId();
     this.users.push({
       name,
@@ -74,9 +75,12 @@ export class Quiz {
     this.currentState = "CHANGE_PROBLEM";
     this.problems[this.activeProblem]?.startTime == new Date().getTime();
     const io = IoManager.getSocketInstance().io;
-    io.to(this.roomId).emit("CHANGE_PROBLEM", {
-      problems: this.problems[this.activeProblem],
-    });
+    if(this.problems[this.activeProblem]){
+      io.to(this.roomId).emit("CHANGE_PROBLEM", {
+        problems: this.problems[this.activeProblem],
+      });
+
+    }
 
     setTimeout(() => {
       this.sendLeaderBoard();
@@ -103,7 +107,7 @@ export class Quiz {
         problem: this.problems[this.activeProblem],
       });
 
-      setTimeout(() => this.sendLeaderBoard, TIME_DURATION_SEC * 1000);
+      setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
       this.currentState = "QUIZ_ENDED";
       this.sendLeaderBoard();

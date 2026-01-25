@@ -65,6 +65,7 @@ export class QuizManager{
         if(this.getQuiz(roomId)===null){
             return "room not found!"
         }
+        console.log("enterd in add User")
         this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
     }
     // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
@@ -80,7 +81,7 @@ export class QuizManager{
         this.getQuiz(roomId)?.submit(roomId,problemId,submission)
 
     }
-
+ 
     // i think this will go to quiz.ts
    public addQuizbyAdmin(roomId:string){
         if (this.getQuiz(roomId)){

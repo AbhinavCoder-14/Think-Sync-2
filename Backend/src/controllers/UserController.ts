@@ -65,10 +65,11 @@ export class UserManager {
     socket: Socket
   ) {
     socket.on("join", (data) => {
+      console.log("enterd in usercontroller!!")
       const userId = this.quizManager.addUser(data.name, data.roomId);
       
       if (userId){
-        console.log("joinig request")
+        console.log("joinig request!!!")
         socket.emit("initilization", {
           userId,
           state:this.quizManager.currentStateQuiz(data.roomId)
