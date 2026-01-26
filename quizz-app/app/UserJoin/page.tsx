@@ -14,7 +14,7 @@ export default function UserJoin() {
     const [isJoined, setIsJoined] = useState<boolean>(false) // Changed convention to camelCase
     const [userId1, setUserId1] = useState<string>("")
     const [userCount, setUserCount] = useState<number>(0)
-
+    const [allUserList, setallUserList] = useState<[] | null>([])
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
@@ -34,7 +34,10 @@ export default function UserJoin() {
             if (data.userId) {
                 setUserId1(data.userId)
                 setIsJoined(true)
-                setUserCount(data.count)
+                if(data.count && data.allUsers){
+                    setUserCount(data.count)
+                    setallUserList(data.allUsers)
+                }
 
                 if (data.state && data.state.type) {
                     setCurrentState(data.state.type)
@@ -89,7 +92,9 @@ export default function UserJoin() {
 
     if (isJoined) {
         if (currentState === "NOT STARTED") {
-            return <WaitingRoom roomId={roomId} players={["123","3242"]} count={userCount}/>
+            if(userCount && allUserList){
+                return <WaitingRoom roomId={roomId} players={allUserList} count={userCount}/>
+            }
         }
 
         if (currentState === "CHANGE_PROBLEM") {

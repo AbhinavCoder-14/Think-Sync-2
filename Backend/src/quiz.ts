@@ -174,8 +174,10 @@ export class Quiz {
     console.log("entered in user_count from backend")
     const io = IoManager.getSocketInstance().io;
     io.to(this.roomId).emit("user_count",{
-      count:this.users.length
+      count:this.users.length,
+      allUsers:this.users
     })
+    
 
     // console.log("architectural way-- ",io.sockets.adapter.rooms.get(this.roomId)?.size)
     return this.users.length

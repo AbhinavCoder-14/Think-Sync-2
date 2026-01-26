@@ -6,31 +6,31 @@ import PixelSnow from '@/components/PixelSnow';
 
 import { useSocket } from '@/app/context/SocketContext';
 
-export default function WaitingRoom({ roomId, players,count }: { roomId: string, players: any[],count:Number }) {
+export default function WaitingRoom({ roomId, players, count }: { roomId: string, players: any[], count: Number }) {
 
   const socket: any = useSocket()
   const [liveCount, setLiveCount] = useState(count);
-  useEffect(()=>{
+  useEffect(() => {
     setLiveCount(count)
 
 
-  },[count])
+  }, [count])
 
   useEffect(() => {
     if (!socket) return;
 
     const handleCountUpdate = (data: any) => {
-      console.log("Count update received:", data.count);
+      console.log("Count update received: waiting room", data.count);
       setLiveCount(data.count);
     };
 
     socket.on("user_count", handleCountUpdate);
 
     return () => {
-      socket.off("user_count",handleCountUpdate);
-      
+      socket.off("user_count", handleCountUpdate);
+
     }
-  },[socket])
+  }, [socket])
 
 
 
