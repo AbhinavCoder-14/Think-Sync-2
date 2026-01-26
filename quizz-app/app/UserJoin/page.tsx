@@ -14,7 +14,7 @@ export default function UserJoin() {
     const [isJoined, setIsJoined] = useState<boolean>(false) // Changed convention to camelCase
     const [userId1, setUserId1] = useState<string>("")
     const [userCount, setUserCount] = useState<number>(0)
-    const [allUserList, setallUserList] = useState<[] | null>([])
+    const [allUserList, setallUserList] = useState<[] | null>()
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
@@ -26,6 +26,7 @@ export default function UserJoin() {
         socket.on("user_count", (data:any) => {
             console.log("Broadcast received:", data.count);
             setUserCount(data.count);
+            setallUserList(data.allUsers)
         });
         
         console.log("enterd in the handle join useEffect")
@@ -34,10 +35,11 @@ export default function UserJoin() {
             if (data.userId) {
                 setUserId1(data.userId)
                 setIsJoined(true)
-                if(data.count && data.allUsers){
+                if(data.count){
                     setUserCount(data.count)
                     setallUserList(data.allUsers)
                 }
+                console.log("----",allUserList)
 
                 if (data.state && data.state.type) {
                     setCurrentState(data.state.type)
@@ -92,8 +94,8 @@ export default function UserJoin() {
 
     if (isJoined) {
         if (currentState === "NOT STARTED") {
-            if(userCount && allUserList){
-                return <WaitingRoom roomId={roomId} players={allUserList} count={userCount}/>
+            if(userCount || allUserList){
+                return <WaitingRoom roomId={roomId} players={allUserList?allUserList:[{name:"sample"}]} count={userCount}/>
             }
         }
 

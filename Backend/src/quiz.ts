@@ -72,7 +72,8 @@ export class Quiz {
     // return {userId,user_count};
 
     this.user_count()
-    return {userId,count:this.users.length};
+    console.log("------------",this.users)
+    return {userId,count:this.users.length,allUser:this.users};
   }
 
 

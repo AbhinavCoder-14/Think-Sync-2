@@ -44,6 +44,11 @@ export class UserManager {
 
       this.isAdmin = true;
       console.log("admin connection init");
+      // const userslength = this.quizManager.
+
+      // socket.emit("user_count",{
+        
+      // })
 
     });
     
@@ -68,7 +73,9 @@ export class UserManager {
           return "unautherized for this event access"
         }
         this.quizManager.next(data.roomId);
+        console.log("enterd in next from admin backend")
       });
+
 
   }
 
@@ -83,7 +90,8 @@ export class UserManager {
         socket.emit("initilization", {
           userId,
           state:this.quizManager.currentStateQuiz(data.roomId),
-          count:userId.count
+          count:userId.count,
+          allUser:userId.allUser
         });
         socket.join(data.roomId)
         this.users.set(socket.id,{roomId:data.roomId,userId:userId.userId})

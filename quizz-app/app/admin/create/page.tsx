@@ -5,6 +5,8 @@ import { useSocket } from "@/app/context/SocketContext";
 import { Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { redirect } from "next/navigation";
+import { Deshboard } from "@/components/dashboard";
 
 interface session{
     name: string;
@@ -93,6 +95,7 @@ export default function Create() {
             }
         }
 
+
         // TODO: verify that the user is autherize or not to create room 
         // -- done
 
@@ -100,9 +103,8 @@ export default function Create() {
     if (roomId){
       return(
         <>
-        
         your room is created the room Id is  {roomId}
-        
+        <Deshboard roomId={roomId}/>
         </>
       )
     }
