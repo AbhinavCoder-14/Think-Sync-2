@@ -6,43 +6,91 @@ import PixelSnow from '@/components/PixelSnow';
 
 import { useSocket } from '@/app/context/SocketContext';
 
-export default function WaitingRoom({ roomId, players, count }: { roomId: string, players: any[], count: Number }) {
+// export default function WaitingRoom({ roomId, players, count }: { roomId: string, players: any[], count: Number }) {
 
-  const socket: any = useSocket()
-  const [liveCount, setLiveCount] = useState(count);
-  useEffect(() => {
-    setLiveCount(count)
+//   const socket: any = useSocket()
+//   const [liveCount, setLiveCount] = useState(count);
+//   const [allUser, setAllUser] = useState<any[]>([]);
 
-
-  }, [count])
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleCountUpdate = (data: any) => {
-      console.log("Count update received: waiting room", data.count);
-      setLiveCount(data.count);
-    };
-
-    socket.on("user_count", handleCountUpdate);
-
-    return () => {
-      socket.off("user_count", handleCountUpdate);
-
-    }
-  }, [socket])
+//   // useEffect(() => {
+//   //   setLiveCount(count)
+//   //   setAllUser(players)
 
 
+//   // }, [count,players])
+
+//   // useEffect(() => {
+//   //   if (!socket) return;
+
+//   //   const handleCountUpdate = (data: any) => {
+//   //     console.log("Count update received: waiting room", data.count);
+//   //     setLiveCount(data.count);
+//   //   };
+
+//   //   socket.on("user_count", handleCountUpdate);
+
+//   //   return () => {
+//   //     socket.off("user_count", handleCountUpdate);
+
+//   //   }
+//   // }, [socket])
+
+
+
+//   return (
+//     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
+//       <PixelSnow density={0.1} speed={0.5} variant="snowflake" className="z-0" />
+
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="z-10 w-full max-w-2xl p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl"
+//       >
+//         <div className="text-center mb-8">
+//           <span className="px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-mono mb-4 inline-block">
+//             ROOM ID: {roomId}
+//           </span>
+//           <h1 className="text-4xl font-bold text-foreground mt-2">Get Ready to Sync!</h1>
+//           <p className="text-muted-foreground mt-2">Waiting for the host to start the quiz...</p>
+//         </div>
+
+//         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+//           {players.map((player, idx) => (
+//             <motion.div
+//               key={idx}
+//               initial={{ scale: 0 }}
+//               animate={{ scale: 1 }}
+//               transition={{ delay: idx * 0.1 }}
+//               className="p-3 rounded-xl bg-secondary/50 border border-border flex items-center gap-2"
+//             >
+//               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+//               <span className="text-sm font-medium truncate">{player.name}</span>
+//             </motion.div>
+//           ))}
+//         </div>
+
+//         <div className="flex flex-col items-center gap-4">
+//           <Loader2 className="h-8 w-8 text-primary animate-spin" />
+//           <div className="flex items-center gap-2 text-muted-foreground">
+//             <Users size={18} />
+//             <span>{liveCount.toString()} players joined</span>
+//           </div>
+//         </div>
+//       </motion.div>
+//     </div>
+//   );
+// }
+
+
+export default function WaitingRoom({ roomId, players, count }: { roomId: string, players: any[], count: number }) {
+  // We remove the local useState for liveCount and allUser 
+  // because the parent (UserJoin) is already managing the socket updates.
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
       <PixelSnow density={0.1} speed={0.5} variant="snowflake" className="z-0" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="z-10 w-full max-w-2xl p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl"
-      >
+      <motion.div className="z-10 w-full max-w-2xl p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl">
         <div className="text-center mb-8">
           <span className="px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-mono mb-4 inline-block">
             ROOM ID: {roomId}
@@ -52,25 +100,30 @@ export default function WaitingRoom({ roomId, players, count }: { roomId: string
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          {players.map((player, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: idx * 0.1 }}
-              className="p-3 rounded-xl bg-secondary/50 border border-border flex items-center gap-2"
-            >
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-sm font-medium truncate">{player.name}</span>
-            </motion.div>
-          ))}
+          {/* Use players prop directly */}
+          {players.length > 0 ? (
+            players.map((player, idx) => (
+              <motion.div
+                key={player.id || idx} // Use a unique ID if available
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                className="p-3 rounded-xl bg-secondary/50 border border-border flex items-center gap-2"
+              >
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-medium truncate">{player.name}</span>
+              </motion.div>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-muted-foreground">Joining room...</p>
+          )}
         </div>
 
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users size={18} />
-            <span>{liveCount.toString()} players joined</span>
+            <span>{count} {count === 1 ? 'player' : 'players'} joined</span>
           </div>
         </div>
       </motion.div>

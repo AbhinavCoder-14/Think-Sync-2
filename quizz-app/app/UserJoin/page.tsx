@@ -14,32 +14,32 @@ export default function UserJoin() {
     const [isJoined, setIsJoined] = useState<boolean>(false) // Changed convention to camelCase
     const [userId1, setUserId1] = useState<string>("")
     const [userCount, setUserCount] = useState<number>(0)
-    const [allUserList, setallUserList] = useState<[] | null>()
+    const [allUserList, setallUserList] = useState<any[]>([])
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
     useEffect(() => {
-        if(!socket){
+        if (!socket) {
             console.log("Entered in handle join useeffet but socket is null")
             return;
         }
-        socket.on("user_count", (data:any) => {
+        socket.on("user_count", (data: any) => {
             console.log("Broadcast received:", data.count);
             setUserCount(data.count);
-            setallUserList(data.allUsers)
+            setallUserList(data.allUser)
         });
-        
+
         console.log("enterd in the handle join useEffect")
         socket.on("initilization", (data: any) => {
             console.log("enterd in init")
             if (data.userId) {
                 setUserId1(data.userId)
                 setIsJoined(true)
-                if(data.count){
+                if (data.count) {
                     setUserCount(data.count)
-                    setallUserList(data.allUsers)
                 }
-                console.log("----",allUserList)
+                if (data.allUser) setallUserList(data.allUser)
+                console.log("----", allUserList)
 
                 if (data.state && data.state.type) {
                     setCurrentState(data.state.type)
@@ -47,9 +47,9 @@ export default function UserJoin() {
 
             }
         })
-        
 
-        
+
+
 
 
         return () => {
@@ -74,7 +74,7 @@ export default function UserJoin() {
         //     setUserCount(data.count)
         //   })
 
-            
+
         // socket.on("initilization", (data: any) => {
         //     console.log("enterd in the handle join")
         //     if (data.userId) {
@@ -94,8 +94,8 @@ export default function UserJoin() {
 
     if (isJoined) {
         if (currentState === "NOT STARTED") {
-            if(userCount || allUserList){
-                return <WaitingRoom roomId={roomId} players={allUserList?allUserList:[{name:"sample"}]} count={userCount}/>
+            if (userCount || allUserList) {
+                return <WaitingRoom roomId={roomId} players={allUserList ? allUserList : []} count={userCount} />
             }
         }
 

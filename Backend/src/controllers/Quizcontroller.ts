@@ -103,6 +103,16 @@ export class QuizManager{
         this.quizes.push(quiz)
     }
 
+    public user_count_admin(roomId:string){
+
+        const quiz = this.getQuiz(roomId)
+        if (!quiz){
+            return null
+        }
+        return quiz.user_count()
+
+    }
+
 
     public addProblem(roomId:string,problem:Problem){
         const quiz = this.getQuiz(roomId)

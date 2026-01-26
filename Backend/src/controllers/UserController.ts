@@ -33,7 +33,6 @@ export class UserManager {
       this.users.delete(socket.id)
       console.log("removing user - UserControl")
     }
-
   }
 
   addAdminInit(socket: Socket) {
@@ -57,6 +56,9 @@ export class UserManager {
           return "unautherized for this event access"
         }
         this.quizManager.addQuizbyAdmin(data.roomId);
+        socket.emit("user_count_admin",{
+          count : this.quizManager.user_count_admin(data.roomId)
+        })
         console.log("create quiz called ", data.roomId);
       });
 
@@ -75,6 +77,7 @@ export class UserManager {
         this.quizManager.next(data.roomId);
         console.log("enterd in next from admin backend")
       });
+      
 
 
   }
@@ -88,7 +91,7 @@ export class UserManager {
       console.log("user id is -- ", userId?.userId)
       if (userId?.userId){
         socket.emit("initilization", {
-          userId,
+          userId:userId.userId,
           state:this.quizManager.currentStateQuiz(data.roomId),
           count:userId.count,
           allUser:userId.allUser
