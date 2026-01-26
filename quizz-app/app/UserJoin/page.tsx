@@ -23,10 +23,10 @@ export default function UserJoin() {
             console.log("Entered in handle join useeffet but socket is null")
             return;
         }
-        
-        socket.on("user_count", (data:any)=>{
-            setUserCount(data.count)
-        })
+        socket.on("user_count", (data:any) => {
+            console.log("Broadcast received:", data.count);
+            setUserCount(data.count);
+        });
         
         console.log("enterd in the handle join useEffect")
         socket.on("initilization", (data: any) => {
@@ -34,10 +34,12 @@ export default function UserJoin() {
             if (data.userId) {
                 setUserId1(data.userId)
                 setIsJoined(true)
+                setUserCount(data.count)
 
                 if (data.state && data.state.type) {
                     setCurrentState(data.state.type)
                 }
+
             }
         })
         
@@ -47,6 +49,7 @@ export default function UserJoin() {
 
         return () => {
             socket.off("initilization");
+            socket.off("user_count");
         }
 
     }, [socket])

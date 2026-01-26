@@ -28,6 +28,7 @@ export default function WaitingRoom({ roomId, players,count }: { roomId: string,
 
     return () => {
       socket.off("user_count",handleCountUpdate);
+      
     }
   },[socket])
 

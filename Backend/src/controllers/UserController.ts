@@ -78,11 +78,12 @@ export class UserManager {
     socket.on("join", (data) => {
       console.log("enterd in usercontroller!!")
       const userId = this.quizManager.addUser(data.name, data.roomId);
-      console.log("user id is -- ", userId)
-      if (userId){
+      console.log("user id is -- ", userId?.userId)
+      if (userId?.userId){
         socket.emit("initilization", {
           userId,
-          state:this.quizManager.currentStateQuiz(data.roomId)
+          state:this.quizManager.currentStateQuiz(data.roomId),
+          count:userId.count
         });
         socket.join(data.roomId)
         this.users.set(socket.id,{roomId:data.roomId,userId:data.userId})
@@ -91,6 +92,10 @@ export class UserManager {
     // socket.on("user_count",(data)=>{
     //   const user_count = this.quizManager.user_count(data.roomId)
     // })
+
+    socket.on("disconnect",()=>{
+      this.disconnectUser(socket)
+    })
 
     socket.on("submit", (data) => {
       const userId = data.userId;

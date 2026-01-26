@@ -76,7 +76,7 @@ export class QuizManager{
             return null;
         }
         console.log("removing user")
-        return this.getQuiz(roomId)?.removeUser(userId)
+        this.getQuiz(roomId)?.removeUser(userId)
 
 
     }

@@ -26,10 +26,10 @@ io.on("connection", (socket) => {
     });
     userManager.addAdminInit(socket);
     userManager.addUser(socket);
-    socket.on("disconnect", () => {
-        console.log("user disconected", socket.id);
-        userManager.disconnectUser(socket);
-    });
+    // socket.on("disconnect",()=>{
+    //   console.log("user disconected",socket.id)
+    //   userManager.disconnectUser(socket)
+    // })
 });
 app.post("/api/get_instance", (req, res) => {
     const message = req.body.message;
