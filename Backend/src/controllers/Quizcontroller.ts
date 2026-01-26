@@ -51,7 +51,7 @@ export class QuizManager{
     public currentStateQuiz(roomId:string){
         const quiz = this.getQuiz(roomId);
         if(quiz){
-            
+
             return quiz.currentStateQuiz();
         }
 
@@ -63,13 +63,24 @@ export class QuizManager{
 
 
     public addUser(name:string,roomId:string){
-        if(this.getQuiz(roomId)===null){
-            return "room not found!"
+        if(!this.getQuiz(roomId)){
+            return null;
         }
         console.log("enterd in add User")
-        this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
+        return this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
     }
     // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
+    
+    public removeUser(roomId:string,userId:string){
+        if(!this.getQuiz(roomId)){
+            return null;
+        }
+        console.log("removing user")
+        return this.getQuiz(roomId)?.removeUser(userId)
+
+
+    }
+    
     public getQuiz(roomId:string){
         return this.quizes.find((x)=>{
             return x.roomId === roomId

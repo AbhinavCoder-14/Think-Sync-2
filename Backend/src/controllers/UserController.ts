@@ -10,19 +10,30 @@ interface User {
 const ADMIN_ROOM_KEY = "1234";
 
 export class UserManager {
-  public users: User[]; // useless
+  public users = new Map<string,{ roomId: string; userId: string }>(); // useless
   private isAdmin: boolean;
 
   private quizManager;
 
   constructor() {
-    this.users = []; // useless
+    // this.users = []; // useless
     this.quizManager = new QuizManager();
     this.isAdmin = false;
   }
 
   addUser(socket: Socket) {
     this.UserOperations(socket);
+  }
+
+  public disconnectUser(socket:Socket){
+    const user = this.users.get(socket.id)
+
+    if (user){
+      this.quizManager.removeUser(user.roomId,user.userId)
+      this.users.delete(socket.id)
+      console.log("removing user - UserControl")
+    }
+
   }
 
   addAdminInit(socket: Socket) {
@@ -67,14 +78,14 @@ export class UserManager {
     socket.on("join", (data) => {
       console.log("enterd in usercontroller!!")
       const userId = this.quizManager.addUser(data.name, data.roomId);
-      
+      console.log("user id is -- ", userId)
       if (userId){
-        console.log("joinig request!!!")
         socket.emit("initilization", {
           userId,
           state:this.quizManager.currentStateQuiz(data.roomId)
         });
         socket.join(data.roomId)
+        this.users.set(socket.id,{roomId:data.roomId,userId:data.userId})
       }
     });
     // socket.on("user_count",(data)=>{

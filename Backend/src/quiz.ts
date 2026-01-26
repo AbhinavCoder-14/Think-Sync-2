@@ -59,15 +59,28 @@ export class Quiz {
 
   public addUser(name: string) {
     console.log("enterd in this quiz.ts")
-    const id = this.randomUUId();
+    const userId = this.randomUUId();
     this.users.push({
       name,
-      id,
+      id:userId,
       points: 0,
     });
-    this.user_count()
+    // wrong way it will not consider the disconnection of user and can't decrement the user count
+    // const user_count = this.user_count()
+    // console.log(user_count)
 
-    return id;
+    // return {userId,user_count};
+
+    this.user_count()
+    return userId;
+  }
+
+
+  public removeUser(userId:string){
+    this.users = this.users.filter((user)=>user.id !==userId)
+    this.user_count()
+    console.log("removing user")
+
   }
 
   public start() {
@@ -158,12 +171,14 @@ export class Quiz {
   }
 
   public user_count(){
-    console.log("entered in user_count")
+    console.log("entered in user_count from backend")
     const io = IoManager.getSocketInstance().io;
     io.to(this.roomId).emit("user_count",{
       count:this.users.length
     })
-    // console.log(io.sockets.adapter.rooms.get(this.roomId)?.size)
+
+    // console.log("architectural way-- ",io.sockets.adapter.rooms.get(this.roomId)?.size)
+    return this.users.length
   }
 
   public currentStateQuiz() {

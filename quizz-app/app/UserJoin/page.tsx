@@ -23,11 +23,14 @@ export default function UserJoin() {
             console.log("Entered in handle join useeffet but socket is null")
             return;
         }
-
+        
+        socket.on("user_count", (data:any)=>{
+            setUserCount(data.count)
+        })
         
         console.log("enterd in the handle join useEffect")
         socket.on("initilization", (data: any) => {
-
+            console.log("enterd in init")
             if (data.userId) {
                 setUserId1(data.userId)
                 setIsJoined(true)
@@ -37,16 +40,13 @@ export default function UserJoin() {
                 }
             }
         })
+        
 
-        socket.on("user_count", (data: any) => {
-            setUserCount(data.count)
-            console.log(data.count)
-        })
+        
 
 
         return () => {
             socket.off("initilization");
-            socket.off("user_count");
         }
 
     }, [socket])
@@ -61,8 +61,12 @@ export default function UserJoin() {
             roomId: roomId
         })
 
-        setIsJoined(true)
-        
+        // socket.on("user_count", (data: any) => {
+        //     console.log("enterd in user_count")
+        //     setUserCount(data.count)
+        //   })
+
+            
         // socket.on("initilization", (data: any) => {
         //     console.log("enterd in the handle join")
         //     if (data.userId) {
@@ -82,7 +86,7 @@ export default function UserJoin() {
 
     if (isJoined) {
         if (currentState === "NOT STARTED") {
-            return <WaitingRoom roomId={roomId} players={["123","3242"]}/>
+            return <WaitingRoom roomId={roomId} players={["123","3242"]} count={userCount}/>
         }
 
         if (currentState === "CHANGE_PROBLEM") {

@@ -44,8 +44,9 @@ io.on("connection",(socket:Socket)=>{
       userManager.addUser(socket)
 
 
-      socket.on("disconect",()=>{
+      socket.on("disconnect",()=>{
         console.log("user disconected",socket.id)
+        userManager.disconnectUser(socket)
       })
     })
 

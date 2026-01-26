@@ -6,22 +6,30 @@ import PixelSnow from '@/components/PixelSnow';
 
 import { useSocket } from '@/app/context/SocketContext';
 
-export default function WaitingRoom({ roomId, players }: { roomId: string, players: any[] }) {
+export default function WaitingRoom({ roomId, players,count }: { roomId: string, players: any[],count:Number }) {
 
   const socket: any = useSocket()
+  const [liveCount, setLiveCount] = useState(count);
+  useEffect(()=>{
+    setLiveCount(count)
 
-  const [userCount, setuserCount] = useState(0);
 
+  },[count])
 
   useEffect(() => {
-    socket.on("user_count", (data: any) => {
-      setuserCount(data.count)
-      console.log(data.count)
-    })
+    if (!socket) return;
+
+    const handleCountUpdate = (data: any) => {
+      console.log("Count update received:", data.count);
+      setLiveCount(data.count);
+    };
+
+    socket.on("user_count", handleCountUpdate);
+
     return () => {
-      socket.off("user_count");
+      socket.off("user_count",handleCountUpdate);
     }
-  },[])
+  },[socket])
 
 
 
@@ -61,7 +69,7 @@ export default function WaitingRoom({ roomId, players }: { roomId: string, playe
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users size={18} />
-            <span>{userCount.toString()} players joined</span>
+            <span>{liveCount.toString()} players joined</span>
           </div>
         </div>
       </motion.div>
