@@ -86,7 +86,7 @@ export class UserManager {
           count:userId.count
         });
         socket.join(data.roomId)
-        this.users.set(socket.id,{roomId:data.roomId,userId:data.userId})
+        this.users.set(socket.id,{roomId:data.roomId,userId:userId.userId})
       }
     });
     // socket.on("user_count",(data)=>{
