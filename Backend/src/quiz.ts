@@ -15,10 +15,10 @@ export interface Problem {
   image: string;
   answer: AllowedSubmission;
   startTime: number;
-  option: {
+  options: {
     id: number;
     title: string;
-  };
+  }[];
   submission: {
     problemId: string;
     userId: string;
@@ -200,15 +200,15 @@ export class Quiz {
 
     if (this.currentState === "CHANGE_PROBLEM") {
       const problem = this.problems[this.activeProblem];
-      return { type: "CHANGE_PROBLEM", problem: problem };
+      return { type: "CHANGE_PROBLEM"};
     }
 
     if (this.currentState === "LEADERBOARD") {
-      return { type: "LEADERBOARD", leaderboard: this.sendLeaderBoard() };
+      return { type: "LEADERBOARD"};
     }
 
     if (this.currentState === "QUIZ_ENDED") {
-      return { type: "QUIZ_ENDED", leaderboard: this.sendLeaderBoard() };
+      return { type: "QUIZ_ENDED"};
     }
   }
 }

@@ -38,7 +38,7 @@ export interface QuizProblem {
       problemId: string;
       title: string;
       image: string;
-      option: { id: number; title: string };
+      options: { id: number; title: string }[];
     };
     getLeaderboard?: any[]; // Matches the key in your sendLeaderBoard() emit
   }
@@ -56,7 +56,7 @@ export default function UserJoin() {
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
     const [currentProblem, setCurrentProblem] = useState<QuizProblem | null>(null);
-const [leaderboard, setLeaderboard] = useState<Player[]>([]);
+    const [leaderboard, setLeaderboard] = useState<Player[]>([]);
 
     useEffect(() => {
         if (!socket) {
@@ -92,18 +92,22 @@ const [leaderboard, setLeaderboard] = useState<Player[]>([]);
             setCurrentState(data.state.type)
             if (data.state && data.state.type==="CHANGE_PROBLEM") {
                 console.log("enterd in current state - ", data.state.type)
+                
                 if(data.problem){
-                    setCurrentProblem(data.problem)
-
+                    setCurrentProblem({problemId:data.problem.problemId,title:data.problem.title,image:data.problem.image,options:[...data.problem.options]})
                 }
-
 
             }
 
             if (data.state && data.state.type==="LEADERBOARD"){
-
                 console.log("enterd in current state - ", data.state.type)
+                if (data.getLeaderboard){
+                    setLeaderboard(data.getLeaderboard);
+                }
+            }
 
+            if (data.state && data.state.type==="QUIZ_ENDED"){
+                console.log("enterd in current state - ", data.state.type)
 
             }
         })

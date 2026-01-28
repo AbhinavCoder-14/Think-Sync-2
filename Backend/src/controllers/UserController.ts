@@ -15,7 +15,7 @@ export class UserManager {
 
   private quizManager;
 
-  constructor() {
+  constructor() { 
     // this.users = []; // useless
     this.quizManager = new QuizManager();
     this.isAdmin = false;
