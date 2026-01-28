@@ -6,6 +6,43 @@ import { useSocket } from "../context/SocketContext"
 import WaitingRoom from "@/components/WaitingRoom"
 
 
+interface Player {
+    name: string;
+  id: string;
+  points: number;
+}
+
+
+export interface QuizProblem {
+    problemId: string;
+    title: string;
+    image: string;
+    options: { // Note: Your backend uses 'option' (singular) or 'options' depending on the file
+      id: number;
+      title: string;
+    }[]; 
+  }
+
+
+  export interface QuizState {
+    type: "NOT STARTED" | "CHANGE_PROBLEM" | "LEADERBOARD" | "QUIZ_ENDED";
+    problem?: QuizProblem;
+    leaderboard?: Player[];
+  }
+
+  interface CurrentStateQuizResponse {
+    state: {
+        type:"NOT STARTED" | "CHANGE_PROBLEM" | "LEADERBOARD" | "QUIZ_ENDED";
+    }
+    problem?: {
+      problemId: string;
+      title: string;
+      image: string;
+      option: { id: number; title: string };
+    };
+    getLeaderboard?: any[]; // Matches the key in your sendLeaderBoard() emit
+  }
+
 
 export default function UserJoin() {
     const socket: any = useSocket()
@@ -17,6 +54,9 @@ export default function UserJoin() {
     const [allUserList, setallUserList] = useState<any[]>([])
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
+
+    const [currentProblem, setCurrentProblem] = useState<QuizProblem | null>(null);
+const [leaderboard, setLeaderboard] = useState<Player[]>([]);
 
     useEffect(() => {
         if (!socket) {
@@ -48,13 +88,31 @@ export default function UserJoin() {
             }
         })
 
+        socket.on("currentStateQuiz",(data:CurrentStateQuizResponse)=>{
+            setCurrentState(data.state.type)
+            if (data.state && data.state.type==="CHANGE_PROBLEM") {
+                console.log("enterd in current state - ", data.state.type)
+                if(data.problem){
+                    setCurrentProblem(data.problem)
+
+                }
 
 
+            }
+
+            if (data.state && data.state.type==="LEADERBOARD"){
+
+                console.log("enterd in current state - ", data.state.type)
+
+
+            }
+        })
 
 
         return () => {
             socket.off("initilization");
             socket.off("user_count");
+            socket.off("currentStateQuiz");
         }
 
     }, [socket])
@@ -100,10 +158,9 @@ export default function UserJoin() {
         }
 
         if (currentState === "CHANGE_PROBLEM") {
+            console.log("Entered in change_problem")
             return <div>Quiz Component Here</div>
         }
-
-
 
         if (currentState === "LEADERBOARD") {
             return <div>Leaderboard Component Here</div>

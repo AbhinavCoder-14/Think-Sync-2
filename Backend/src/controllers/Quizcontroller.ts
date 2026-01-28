@@ -40,18 +40,18 @@ export class QuizManager{
 
 
     public next(roomId:string){
-        const io = IoManager.getSocketInstance().io
         const quiz = this.getQuiz(roomId)
-
-        if(quiz){
-            quiz.next()
+        
+        if(!quiz){
+            return "quiz not found"
         }
+        quiz.next()
+        console.log("Entered in next - quiz")
     }
 
     public currentStateQuiz(roomId:string){
         const quiz = this.getQuiz(roomId);
         if(quiz){
-
             return quiz.currentStateQuiz();
         }
 

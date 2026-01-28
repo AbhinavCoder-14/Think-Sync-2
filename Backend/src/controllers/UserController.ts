@@ -98,8 +98,14 @@ export class UserManager {
         });
         socket.join(data.roomId)
         this.users.set(socket.id,{roomId:data.roomId,userId:userId.userId})
+        // wrong way because it just sending it to on user socket just have 1 to 1 connection
+        // socket.emit("currentStateQuiz", { 
+        //   state:this.quizManager.currentStateQuiz(data.roomId)
+        // })
+
       }
     });
+
     // socket.on("user_count",(data)=>{
     //   const user_count = this.quizManager.user_count(data.roomId)
     // })

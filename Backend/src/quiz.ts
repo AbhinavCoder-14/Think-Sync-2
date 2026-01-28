@@ -90,7 +90,8 @@ export class Quiz {
     this.problems[this.activeProblem]?.startTime == new Date().getTime();
     const io = IoManager.getSocketInstance().io;
     if(this.problems[this.activeProblem]){
-      io.to(this.roomId).emit("CHANGE_PROBLEM", {
+      io.to(this.roomId).emit("currentStateQuiz", {
+        state: this.currentStateQuiz(),
         problems: this.problems[this.activeProblem],
       });
 
@@ -106,20 +107,26 @@ export class Quiz {
     const getLeaderboard = this.users
       .sort((a, b) => (a.points < b.points ? 1 : -1))
       .splice(0, 20);
-    IoManager.getSocketInstance().io.to(this.roomId).emit("LEADERBOARD", {
+    IoManager.getSocketInstance().io.to(this.roomId).emit("currentStateQuiz", {
+      state: this.currentStateQuiz(),
       getLeaderboard,
     });
     return getLeaderboard;
   }
 
   public next() {
+    console.log("Entered in next - quiz")
+
     const io = IoManager.getSocketInstance().io;
     this.activeProblem++;
     this.currentState = "CHANGE_PROBLEM";
     if (this.problems[this.activeProblem]) {
-      io.to(this.roomId).emit("CHANGE_PROBLEM", {
+      io.to(this.roomId).emit("currentStateQuiz", {
+        state: this.currentStateQuiz(),
         problem: this.problems[this.activeProblem],
       });
+      console.log("Entered in next - quiz")
+
 
       setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
@@ -174,7 +181,7 @@ export class Quiz {
   public user_count(){
     console.log("entered in user_count from backend")
     const io = IoManager.getSocketInstance().io;
-    io.to(this.roomId).emit("user_count",{
+    io.to(this.roomId).emit("user_count",{ // Broadcasting the message to everyone
       count:this.users.length,
       allUsers:this.users
     })
