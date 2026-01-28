@@ -5,8 +5,15 @@ import crypto from 'crypto';
 import { IoManager } from './controllers/IoInit.js';
 import { UserManager } from './controllers/UserController.js';
 import { Socket } from 'socket.io';
+import { redis } from "./redis/client.js";
 const app = express();
 const port = process.env.PORT || 4000;
+const redis_test = async () => {
+    await redis.set("value", "hello");
+    const value = await redis.get("value");
+    console.log("redis saying, ", value);
+};
+redis_test();
 app.use(cors());
 app.use(express.json());
 const server = http.createServer(app);

@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/quiz.ts","./src/controllers/ioinit.ts","./src/controllers/quizcontroller.ts","./src/controllers/usercontroller.ts","./src/controllers/adminmanager.ts"],"version":"5.9.3"}
+{"root":["./src/index.ts","./src/quiz.ts","./src/controllers/ioinit.ts","./src/controllers/quizcontroller.ts","./src/controllers/usercontroller.ts","./src/controllers/adminmanager.ts","./src/redis/client.ts"],"version":"5.9.3"}

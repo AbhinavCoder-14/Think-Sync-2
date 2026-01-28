@@ -105,7 +105,7 @@ export class Quiz {
   public sendLeaderBoard() {
     this.currentState = "LEADERBOARD";
     const getLeaderboard = this.users
-      .sort((a, b) => (a.points < b.points ? 1 : -1))
+      .sort((a, b) => ((a.points < b.points) ? 1 : -1))
       .splice(0, 20);
     IoManager.getSocketInstance().io.to(this.roomId).emit("currentStateQuiz", {
       state: this.currentStateQuiz(),
