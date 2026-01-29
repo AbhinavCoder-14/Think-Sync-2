@@ -247,6 +247,68 @@ graph TB
     style SE15 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
 
 ```
+
+## 📋 Complete Event Reference
+
+### 1️⃣ Player Events
+
+#### Client → Server (User Emits)
+
+| Event | Payload | Description | File Location |
+|-------|---------|-------------|---------------|
+| `join` | `{name: string, roomId: string}` | Player joins a quiz room | `UserJoin/page.tsx` |
+| `submit` | `{userId: string, problemId: string, submission: 0\|1\|2\|3, roomId: string}` | Submit answer to question | `UserController.ts` |
+| `disconnect` | - | Player disconnects from room | Auto-triggered |
+| `message` | `{message: string}` | Send chat message (testing) | `index.ts` |
+
+#### Server → Client (Server Emits to Users)
+
+| Event | Payload | Description | Broadcast Type |
+|-------|---------|-------------|----------------|
+| `initialization` | `{userId: string, state: object, count: number, allUser: User[]}` | Initial user data after join | Individual |
+| `user_count` | `{count: number, allUsers: User[]}` | Live player count update | Room Broadcast |
+| `currentStateQuiz` | `{state: {type: string}, problem?: Problem, getLeaderboard?: Player[]}` | Quiz state changes | Room Broadcast |
+| `message` | `{msg: string, timeStamp: Date}` | Broadcast chat message | Global Broadcast |
+
+---
+
+### 2️⃣ Admin Events
+
+#### Client → Server (Admin Emits)
+
+| Event | Payload | Description | File Location |
+|-------|---------|-------------|---------------|
+| `join_admin` | `{password: string}` | Admin authentication (password: "1234") | `admin/create/page.tsx` |
+| `create_quiz` | `{roomId: string}` | Create new quiz room | `admin/create/page.tsx` |
+| `add_problems` | `{roomId: string, problem: Problem\|string}` | Add questions to quiz | `admin/create/page.tsx` |
+| `next` | `{roomId: string}` | Start quiz or move to next question | `dashboard.tsx` |
+
+#### Server → Client (Server Emits to Admin)
+
+| Event | Payload | Description | Broadcast Type |
+|-------|---------|-------------|----------------|
+| `user_count_admin` | `{count: number}` | Player count for admin dashboard | Individual |
+| `admin-message` | `{msg: string, timeStamp: Date}` | Admin broadcast message (via API) | Global Broadcast |
+
+---
+
+### 3️⃣ Server Internal Events
+
+#### Server Listeners (Socket.on)
+
+| Event | Handler Location | Function Called |
+|-------|------------------|-----------------|
+| `connection` | `index.ts` | Initialize socket connection |
+| `join` | `UserController.ts` | `UserManager.addUser()` |
+| `submit` | `UserController.ts` | `QuizManager.submit()` |
+| `disconnect` | `UserController.ts` | `UserManager.disconnectUser()` |
+| `message` | `index.ts` | Broadcast message handler |
+| `join_admin` | `UserController.ts` | `UserManager.addAdminInit()` |
+| `create_quiz` | `UserController.ts` | `QuizManager.addQuizbyAdmin()` |
+| `add_problems` | `UserController.ts` | `QuizManager.addProblem()` |
+| `next` | `UserController.ts` | `QuizManager.next()` |
+
+---
 ---
 
 ## 🚀 Getting Started
