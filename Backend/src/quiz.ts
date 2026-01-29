@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import { IoManager } from "./controllers/IoInit.js";
+import {redis} from "./redis/client.js"
+
 
 export interface User {
   name: string;
@@ -41,6 +43,9 @@ export class Quiz {
   private problems: Problem[];
   private activeProblem: number;
   private currentState: currentState;
+  private currentQuestion: number;
+  private status: string | undefined;
+
 
   constructor(roomId: string) {
     this.roomId = roomId;
@@ -49,6 +54,8 @@ export class Quiz {
     this.problems = [];
     this.activeProblem = 0;
     this.currentState = "NOT STARTED";
+    this.currentQuestion = 0;
+    this.status = "waiting";
   }
 
   private randomUUId() {
@@ -120,6 +127,7 @@ export class Quiz {
     const io = IoManager.getSocketInstance().io;
     this.activeProblem++;
     this.currentState = "CHANGE_PROBLEM";
+    console.log(this.problems)
     if (this.problems[this.activeProblem]) {
       io.to(this.roomId).emit("currentStateQuiz", {
         state: this.currentStateQuiz(),
@@ -128,7 +136,7 @@ export class Quiz {
       console.log("Entered in next - quiz")
 
 
-      setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
+      // setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
       this.currentState = "QUIZ_ENDED";
       this.sendLeaderBoard();
@@ -138,6 +146,8 @@ export class Quiz {
 
   public addProblem(data:any){
     this.problems.push(data)
+    return "problem added"
+    console.log("\n\n\nlksadjflkasjdflkjlasjdfkljsalkdf lkshadfkjhasldjkf\n\n\n",this.problems)
 
   }
 
@@ -210,5 +220,14 @@ export class Quiz {
     if (this.currentState === "QUIZ_ENDED") {
       return { type: "QUIZ_ENDED"};
     }
+  }
+
+
+  public setCurrentQuestion(questionNumber: number) {
+    this.currentQuestion = questionNumber;
+  }
+  
+  public setStatus(status: any) {
+    this.status = status;
   }
 }

@@ -1,12 +1,10 @@
-import { Quiz } from "../quiz.js"
+import { Quiz } from "../quiz.js";
+import { redis } from "../redis/client.js";
 import { IoManager } from "./IoInit.js";
 
-
-type AllowedSubmission = 0| 1 |2 |3;
-
+type AllowedSubmission = 0 | 1 | 2 | 3;
 
 export interface Problem {
-
   title: string;
   image: string;
   answer: AllowedSubmission;
@@ -16,127 +14,156 @@ export interface Problem {
   };
 }
 
+let globalProblemIndex = 0;
 
-let globalProblemIndex = 0
+export class QuizManager {
+  private quizes: Quiz[];
 
+  constructor() {
+    this.quizes = [];
+  }
 
-export class QuizManager{
-    private quizes:Quiz[];
+  public start(roomId: string) {
+    const quiz = this.getQuiz(roomId);
 
+    if (!quiz) {
+      return;
+    }
+    quiz.start();
+  }
 
-    constructor(){
-        this.quizes = []
+  public next(roomId: string) {
+    const quiz = this.getQuiz(roomId);
 
+    if (!quiz) {
+      return "quiz not found";
+    }
+    quiz.next();
+    console.log("Entered in next - quiz");
+  }
+
+  public async currentStateQuiz(roomId: string) {
+    const quiz = this.getQuiz(roomId);
+    const exists = await this.getQuizInRedis(roomId);
+    if (quiz) {
+      return quiz.currentStateQuiz();
+    }
+  }
+
+  // public user_count(roomId:string){
+  //     const quiz
+  // }
+
+  public addUser(name: string, roomId: string) {
+    if (!this.getQuiz(roomId)) {
+      return null;
+    }
+    console.log("enterd in add User");
+    return this.getQuiz(roomId)?.addUser(name); // user will get added to the perticular roomId quiz
+  }
+  // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
+
+  public removeUser(roomId: string, userId: string) {
+    if (!this.getQuiz(roomId)) {
+      return null;
+    }
+    console.log("removing user");
+    this.getQuiz(roomId)?.removeUser(userId);
+  }
+
+  public getQuiz(roomId: string) {
+    return (
+      this.quizes.find((x) => {
+        return x.roomId === roomId;
+      }) ?? null
+    );
+
+    // return array of unique roomId quiz array
+  }
+  // for persisting the data in RAM
+  public async getQuizInRedis(roomId: string) {
+    const data = await redis.hgetall(`room:${roomId}`);
+    if (!data) {
+      return null;
+    }
+    return {
+      status: data?.status,
+      currentQuestion: Number(data.currentQuestion),
+    };
+  }
+
+  // Rehydration of quiz from redis
+  private async loadQuizInMemory(roomId: string) {
+    const state = await this.getQuizInRedis(roomId);
+    if (!state) return null;
+
+    const quiz = new Quiz(roomId);
+
+    quiz.setCurrentQuestion(state.currentQuestion);
+    quiz.setStatus(state.status);
+
+    this.quizes.push(quiz);
+    return quiz;
+  }
+
+  public submit(
+    userId: string,
+    roomId: string,
+    problemId: string,
+    submission: AllowedSubmission,
+  ) {
+    this.getQuiz(roomId)?.submit(userId, problemId, submission);
+  }
+
+  // i think this will go to quiz.ts
+  public async addQuizbyAdmin(roomId: string) {
+    if (this.getQuiz(roomId)) {
+      return ("Room already exists");
     }
 
-    public start(roomId:string){
-        const quiz = this.getQuiz(roomId)
-
-        if(!quiz){
-            return
-        }
-        quiz.start();
+    if (!this.getQuiz(roomId) && (await this.getQuizInRedis(roomId))) {
+      await this.loadQuizInMemory(roomId);
+      return ("Room Already exists (rehydration success)");
     }
 
+    const quiz = new Quiz(roomId);
+    this.quizes.push(quiz);
+    await redis.hset(`room:${roomId}`, {
+      status: "waiting",
+      currentQuestion: "0",
+    });
+  }
 
-    public next(roomId:string){
-        const quiz = this.getQuiz(roomId)
-        
-        if(!quiz){
-            return "quiz not found"
-        }
-        quiz.next()
-        console.log("Entered in next - quiz")
+  public user_count_admin(roomId: string) {
+    const quiz = this.getQuiz(roomId);
+    if (!quiz) {
+      return null;
     }
+    return quiz.user_count();
+  }
 
-    public currentStateQuiz(roomId:string){
-        const quiz = this.getQuiz(roomId);
-        if(quiz){
-            return quiz.currentStateQuiz();
-        }
-
+  public addProblem(roomId: string, problem: Problem) {
+    const quiz = this.getQuiz(roomId);
+    console.log("entered in quiz control",problem)
+    if (!quiz) {
+      return "quiz not found"
     }
-
-    // public user_count(roomId:string){
-    //     const quiz
-    // }
-
-
-    public addUser(name:string,roomId:string){
-        if(!this.getQuiz(roomId)){
-            return null;
-        }
-        console.log("enterd in add User")
-        return this.getQuiz(roomId)?.addUser(name) // user will get added to the perticular roomId quiz
-    }
-    // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
+    console.log("entered in quiz control 1",problem)
     
-    public removeUser(roomId:string,userId:string){
-        if(!this.getQuiz(roomId)){
-            return null;
-        }
-        console.log("removing user")
-        this.getQuiz(roomId)?.removeUser(userId)
+    quiz.addProblem({
+      ...problem,
+      problemId: (globalProblemIndex++).toString(),
+      startTime: null,
+      submission: [],
+    });
+  }
+  // i'don't think user_count found is need to get the user count in perticular room
+  // public user_count(roomId:string){
+  //     const quiz = this.getQuiz(roomId)
 
+  //     const user_count = quiz?.user_count()
 
-    }
-    
-    public getQuiz(roomId:string){
-        return this.quizes.find((x)=>{
-            return x.roomId === roomId
-        }) ?? null
+  //     return user_count;
 
-        // return array of unique roomId quiz array
-    }
-
-    public submit(userId:string,roomId:string,problemId:string,submission:AllowedSubmission){
-        this.getQuiz(roomId)?.submit(userId,problemId,submission)
-
-    }
- 
-    // i think this will go to quiz.ts
-   public addQuizbyAdmin(roomId:string){
-        if (this.getQuiz(roomId)){
-            return;
-        }
-        const quiz = new Quiz(roomId)
-        this.quizes.push(quiz)
-    }
-
-    public user_count_admin(roomId:string){
-
-        const quiz = this.getQuiz(roomId)
-        if (!quiz){
-            return null
-        }
-        return quiz.user_count()
-
-    }
-
-
-    public addProblem(roomId:string,problem:Problem){
-        const quiz = this.getQuiz(roomId)
-        if(!quiz){
-            return null;
-        }
-
-        quiz.addProblem({
-            ...problem,
-            problemId:(globalProblemIndex++).toString(),
-            startTime:null,
-            submission:[]
-        })
-
-
-    }
-    // i'don't think user_count found is need to get the user count in perticular room
-    // public user_count(roomId:string){
-    //     const quiz = this.getQuiz(roomId)
-
-    //     const user_count = quiz?.user_count()
-
-    //     return user_count;
-
-    // }
-
+  // }
 }

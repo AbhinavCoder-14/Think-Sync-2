@@ -1,5 +1,7 @@
 import { Socket } from "socket.io";
 import { QuizManager } from "./Quizcontroller.js";
+import { redis } from "../redis/client.js";
+
 
 interface User {
   roomId: string;
@@ -51,11 +53,11 @@ export class UserManager {
 
     });
     
-      socket.on("create_quiz", (data) => {
+      socket.on("create_quiz", async (data) => {
         if(!this.isAdmin){
           return "unautherized for this event access"
         }
-        this.quizManager.addQuizbyAdmin(data.roomId);
+        await this.quizManager.addQuizbyAdmin(data.roomId);
         socket.emit("user_count_admin",{
           count : this.quizManager.user_count_admin(data.roomId)
         })
@@ -67,7 +69,7 @@ export class UserManager {
           return "unautherized for this event access"
         }
         this.quizManager.addProblem(data.roomId, data.problem);
-        console.log(`Admin Added in ${data.roomId} ---- ${data.problem}`)
+        console.log(`Admin Added in ${data.roomId}`)
       });
 
       socket.on("next", (data) => {
