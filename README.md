@@ -162,61 +162,91 @@ sequenceDiagram
 ### Socket.io Event Architecture
 
 ```mermaid
-graph LR
-    subgraph "Client Events (Emit)"
-        CE1["join"]
-        CE2["submit"]
+graph TB
+    subgraph "👤 Client Events (User Emit)"
+        CE1["join<br/>{name, roomId}"]
+        CE2["submit<br/>{userId, problemId,<br/>submission, roomId}"]
         CE3["disconnect"]
-        CE4["join_admin"]
-        CE5["create_quiz"]
-        CE6["add_problems"]
-        CE7["next"]
+        CE4["message<br/>{message}"]
     end
 
-    subgraph "Server Events (On)"
+    subgraph "👨‍💼 Client Events (Admin Emit)"
+        CE5["join_admin<br/>{password}"]
+        CE6["create_quiz<br/>{roomId}"]
+        CE7["add_problems<br/>{roomId, problem}"]
+        CE8["next<br/>{roomId}"]
+    end
+
+    subgraph "🔌 Server Events (Listen/On)"
         SE1["connection"]
         SE2["join"]
         SE3["submit"]
         SE4["disconnect"]
-        SE5["join_admin"]
-        SE6["create_quiz"]
-        SE7["add_problems"]
-        SE8["next"]
+        SE5["message"]
+        SE6["join_admin"]
+        SE7["create_quiz"]
+        SE8["add_problems"]
+        SE9["next"]
     end
 
-    subgraph "Server Events (Emit)"
-        SE9["initialization"]
-        SE10["user_count"]
-        SE11["user_count_admin"]
-        SE12["currentStateQuiz"]
+    subgraph "📤 Server Events (Emit to Client)"
+        SE10["initialization<br/>{userId, state,<br/>count, allUser}"]
+        SE11["user_count<br/>{count, allUsers}"]
+        SE12["user_count_admin<br/>{count}"]
+        SE13["currentStateQuiz<br/>{state, problem,<br/>getLeaderboard}"]
+        SE14["message<br/>{msg, timeStamp}"]
+        SE15["admin-message<br/>{msg, timeStamp}"]
     end
 
+    %% User Flow
+    CE1 -->|Socket Connection| SE1
     CE1 --> SE2
     CE2 --> SE3
     CE3 --> SE4
     CE4 --> SE5
+
+    %% Admin Flow
     CE5 --> SE6
     CE6 --> SE7
     CE7 --> SE8
+    CE8 --> SE9
 
-    SE2 --> SE9
+    %% Server Responses
     SE2 --> SE10
-    SE6 --> SE11
-    SE8 --> SE12
+    SE2 --> SE11
+    SE7 --> SE12
+    SE9 --> SE13
+    SE5 --> SE14
 
-    style CE1 fill:#0ea5e9,stroke:#fff,color:#fff
-    style CE2 fill:#0ea5e9,stroke:#fff,color:#fff
-    style CE3 fill:#0ea5e9,stroke:#fff,color:#fff
-    style CE4 fill:#8b5cf6,stroke:#fff,color:#fff
-    style CE5 fill:#8b5cf6,stroke:#fff,color:#fff
-    style CE6 fill:#8b5cf6,stroke:#fff,color:#fff
-    style CE7 fill:#8b5cf6,stroke:#fff,color:#fff
-    style SE9 fill:#10b981,stroke:#fff,color:#fff
-    style SE10 fill:#10b981,stroke:#fff,color:#fff
-    style SE11 fill:#10b981,stroke:#fff,color:#fff
-    style SE12 fill:#10b981,stroke:#fff,color:#fff
+    %% Styling
+    style CE1 fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    style CE2 fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    style CE3 fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    style CE4 fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    
+    style CE5 fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    style CE6 fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    style CE7 fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    style CE8 fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    
+    style SE1 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE2 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE3 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE4 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE5 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE6 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE7 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE8 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    style SE9 fill:#ef4444,stroke:#fff,stroke-width:2px,color:#fff
+    
+    style SE10 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    style SE11 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    style SE12 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    style SE13 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    style SE14 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    style SE15 fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+
 ```
-
 ---
 
 ## 🚀 Getting Started
