@@ -9,6 +9,8 @@
 
 ---
 
+
+
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
@@ -22,6 +24,18 @@
 - [🤝 Contributing](#-contributing)
 
 ---
+
+## Demo Video
+
+## 🎥 Project Walkthrough
+
+[![Project Walkthrough](./public/image.png)](.quizz-app/public/demo-video/demo-video.mp4)
+
+
+
+
+
+
 
 ## ✨ Features
 
