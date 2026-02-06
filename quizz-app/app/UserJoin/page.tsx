@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSocket } from "../context/SocketContext"
 import WaitingRoom from "@/components/WaitingRoom"
+import Leaderboard from "@/components/Leaderboard"
+import QuizEnded from "@/components/Quiz_Ended"
+import Quiz from "@/components/QuizInterface"
 
 
 interface Player {
@@ -163,16 +166,24 @@ export default function UserJoin() {
 
         if (currentState === "CHANGE_PROBLEM") {
             console.log("Entered in change_problem")
-            return <div>Quiz Component Here</div>
-        }
+            return <Quiz problem= {
+            problemId: "sdf",
+            title: "asdf",
+            image: "asdf",
+            options: [{id: "sdaf", title: "asdf"}],
+            } onsubmit={}/>
 
         if (currentState === "LEADERBOARD") {
-            return <div>Leaderboard Component Here</div>
+            return <Leaderboard players={[
+                {name:"sdfa", id:"sdf", points:100},
+            ]} currentUserId={"243232"}/>
         }
         if (currentState === "QUIZ_ENDED") {
-            return <div>Quiz has ended</div>
-
+            return <QuizEnded players={[
+                {name:"sdfa", id:"sdf", points:100},
+            ]} currentUserId={"243232"}/>
         }
+    
     }
 
     return (
