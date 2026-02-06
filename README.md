@@ -29,7 +29,7 @@
 
 ## 🎥 Project Walkthrough
 
-[![Project Walkthrough](quizz-app/public/image.png)](https://drive.google.com/drive/folders/1HDyaHNKsqGJ83gaYATz5aR_gpxhIXAil?ths=true)
+[![Project Walkthrough](quizz-app/public/image.png)]([https://drive.google.com/drive/folders/1HDyaHNKsqGJ83gaYATz5aR_gpxhIXAil?ths=true](https://drive.google.com/file/d/1kcWKNmqgr6_46vuUPZJgHuPV8uekbCe6/view?usp=sharing))
 
 
 
