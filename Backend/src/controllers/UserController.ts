@@ -120,18 +120,19 @@ export class UserManager {
     socket.on("submit", (data) => {
       const userId = data.userId;
       const problemId = data.problemId;
-      const submission = data.submission;
+      const submission = (data.submission);
       const roomId = data.roomId;
 
-      if (
-        submission != 1 ||
-        submission != 2 ||
-        submission != 2 ||
-        submission != 3
-      ) {
-        console.error("issue while sumiting the answer");
-        return;
-      }
+      // if (
+      //   submission != "1" ||
+      //   submission != "2" ||
+      //   submission !="3"||
+      //   submission != "4"
+      // ) {
+      //   console.error("issue while sumiting the answer");
+      //   console.log(data)
+      //   return;
+      // }
       this.quizManager.submit(userId, roomId, problemId, submission);
     });
 

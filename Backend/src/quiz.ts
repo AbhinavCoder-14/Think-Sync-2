@@ -9,7 +9,7 @@ export interface User {
   points: number;
 }
 
-type AllowedSubmission = 0 | 1 | 2 | 3;
+type AllowedSubmission = 1 | 2 | 3 | 4;
 const TIME_DURATION_SEC = 20;
 export interface Problem {
   problemId: string;
@@ -101,7 +101,6 @@ export class Quiz {
         state: this.currentStateQuiz(),
         problems: this.problems[this.activeProblem],
       });
-
     }
 
     setTimeout(() => {
@@ -118,6 +117,9 @@ export class Quiz {
       state: this.currentStateQuiz(),
       getLeaderboard,
     });
+    setTimeout(() => {
+      this.next();
+    }, 2000);
     return getLeaderboard;
   }
 
@@ -125,7 +127,6 @@ export class Quiz {
     console.log("Entered in next - quiz")
 
     const io = IoManager.getSocketInstance().io;
-    this.activeProblem++;
     this.currentState = "CHANGE_PROBLEM";
     console.log(this.problems)
     if (this.problems[this.activeProblem]) {
@@ -134,8 +135,9 @@ export class Quiz {
         problem: this.problems[this.activeProblem],
       });
       console.log("Entered in next - quiz")
-
-
+      this.activeProblem++;
+      
+      
       setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
       this.currentState = "QUIZ_ENDED";
@@ -150,6 +152,9 @@ export class Quiz {
     console.log("\n\n\nlksadjflkasjdflkjlasjdfkljsalkdf lkshadfkjhasldjkf\n\n\n",this.problems)
 
   }
+
+
+
 
   public submit(
     userId: string,
@@ -183,7 +188,7 @@ export class Quiz {
         user.points +=
           1000 -
           ((submissionTime - isProblemExists.startTime) * 600) /
-            (TIME_DURATION_SEC * 1000);
+            (TIME_DURATION_SEC * 1000); // an formula for rewarding points based on the the time they take to submit the answer
       }
     }
   }

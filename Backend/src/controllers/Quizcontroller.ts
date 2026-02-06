@@ -2,7 +2,7 @@ import { Quiz } from "../quiz.js";
 import { redis } from "../redis/client.js";
 import { IoManager } from "./IoInit.js";
 
-type AllowedSubmission = 0 | 1 | 2 | 3;
+type AllowedSubmission =  1 | 2 | 3 | 4;
 
 export interface Problem {
   title: string;

@@ -198,14 +198,12 @@ export default function UserJoin() {
             // } onsubmit={}/>
 
         if (currentState === "LEADERBOARD") {
-            return <Leaderboard players={[
-                {name:"sdfa", id:"sdf", points:100},
-            ]} currentUserId={"243232"}/>
+            return <Leaderboard players={leaderboard} currentUserId={userId1}/>
         }
         if (currentState === "QUIZ_ENDED") {
             return <QuizEnded players={[
                 {name:"sdfa", id:"sdf", points:100},
-            ]} currentUserId={"243232"}/>
+            ]} currentUserId={userId1}/>
         }
     
     }
