@@ -144,11 +144,11 @@ export class QuizManager {
   }
 
 public addProblem(roomId: string, problem: any) {
-  console.log("🔍 Attempting to add problem to room:", roomId);
+  console.log("Attempting to add problem to room:", roomId);
   const quiz = this.getQuiz(roomId);
   
   if (!quiz) {
-    console.error("❌ Quiz not found");
+    console.error("Quiz not found");
     return "quiz not found";
   }
   
