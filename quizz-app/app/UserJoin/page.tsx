@@ -166,12 +166,36 @@ export default function UserJoin() {
 
         if (currentState === "CHANGE_PROBLEM") {
             console.log("Entered in change_problem")
-            return <Quiz problem= {
-            problemId: "sdf",
-            title: "asdf",
-            image: "asdf",
-            options: [{id: "sdaf", title: "asdf"}],
-            } onsubmit={}/>
+            // return <Leaderboard players={[
+            //     {name:"sdfa", id:"sdf", points:100},
+            // ]} currentUserId={"243232"}/>
+
+            if(!currentProblem){
+                return <div>Loading Problem...</div>
+            }
+
+         return <Quiz 
+            problem={currentProblem} 
+            onSubmit={(answer: number) => {
+                if (!socket || !userId1 || !roomId) return;
+                
+                socket.emit("submit", {
+                    userId: userId1,
+                    roomId: roomId,
+                    problemId: currentProblem.problemId,
+                    submission: answer
+                });
+            }}
+            timer={20} // Optional - defaults to 20 if not provided
+            />
+
+        }
+            // return <Quiz problem= {
+            // problemId: "sdf",
+            // title: "asdf",
+            // image: "asdf",
+            // options: [{id: "sdaf", title: "asdf"}],
+            // } onsubmit={}/>
 
         if (currentState === "LEADERBOARD") {
             return <Leaderboard players={[

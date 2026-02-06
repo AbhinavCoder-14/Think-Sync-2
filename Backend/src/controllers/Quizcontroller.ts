@@ -120,14 +120,15 @@ export class QuizManager {
     if (this.getQuiz(roomId)) {
       return ("Room already exists");
     }
-
-    if (!this.getQuiz(roomId) && (await this.getQuizInRedis(roomId))) {
-      await this.loadQuizInMemory(roomId);
-      return ("Room Already exists (rehydration success)");
-    }
+    // fix: problemmatic as it is casue problem i creating quiz and due to that addProblem is not working
+    // if (!this.getQuiz(roomId) && (await this.getQuizInRedis(roomId))) {
+    //   await this.loadQuizInMemory(roomId);
+    //   return ("Room Already exists (rehydration success)");
+    // }
 
     const quiz = new Quiz(roomId);
     this.quizes.push(quiz);
+    console.log("quiz created")
     await redis.hset(`room:${roomId}`, {
       status: "waiting",
       currentQuestion: "0",
@@ -142,21 +143,33 @@ export class QuizManager {
     return quiz.user_count();
   }
 
-  public addProblem(roomId: string, problem: Problem) {
-    const quiz = this.getQuiz(roomId);
-    console.log("entered in quiz control",problem)
-    if (!quiz) {
-      return "quiz not found"
-    }
-    console.log("entered in quiz control 1",problem)
-    
-    quiz.addProblem({
-      ...problem,
-      problemId: (globalProblemIndex++).toString(),
-      startTime: null,
-      submission: [],
-    });
+public addProblem(roomId: string, problem: any) {
+  console.log("🔍 Attempting to add problem to room:", roomId);
+  const quiz = this.getQuiz(roomId);
+  
+  if (!quiz) {
+    console.error("❌ Quiz not found");
+    return "quiz not found";
   }
+  
+  // ✅ Handle both string and object formats
+  let parsedProblem = problem;
+  if (typeof problem === 'string') {
+    parsedProblem = JSON.parse(problem);
+  }
+  
+  // ✅ Handle both single problem and array
+  const problemsToAdd = Array.isArray(parsedProblem) 
+    ? parsedProblem 
+    : [parsedProblem]; // converting if the problems are not in array
+    
+  
+  problemsToAdd.forEach((prob) => {
+    quiz.addProblem({...prob, problemId: (globalProblemIndex++).toString()});
+  });
+
+  console.log("problems are added")
+}
   // i'don't think user_count found is need to get the user count in perticular room
   // public user_count(roomId:string){
   //     const quiz = this.getQuiz(roomId)

@@ -58,6 +58,7 @@ export class UserManager {
           return "unautherized for this event access"
         }
         await this.quizManager.addQuizbyAdmin(data.roomId);
+        console.log("quiz created======")
         socket.emit("user_count_admin",{
           count : this.quizManager.user_count_admin(data.roomId)
         })

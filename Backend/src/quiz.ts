@@ -136,7 +136,7 @@ export class Quiz {
       console.log("Entered in next - quiz")
 
 
-      // setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
+      setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
       this.currentState = "QUIZ_ENDED";
       this.sendLeaderBoard();
