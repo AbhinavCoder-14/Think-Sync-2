@@ -25,7 +25,7 @@ export interface Problem {
     problemId: string;
     userId: string | any;
     submitedAnswer: Number | any;
-    isCorrect: boolean | any;
+    isCorrect: boolean;
   }[];
 }
 
@@ -60,12 +60,12 @@ export class Quiz {
 
   private randomUUId() {
     let userId = crypto.randomUUID();
-    console.log(userId);
+    // console.log(userId);
     return userId;
   }
 
   public addUser(name: string) {
-    console.log("enterd in this quiz.ts")
+    // console.log("enterd in this quiz.ts")
     const userId = this.randomUUId();
     this.users.push({
       name,
@@ -79,7 +79,7 @@ export class Quiz {
     // return {userId,user_count};
 
     this.user_count()
-    console.log("------------",this.users)
+    // console.log("------------",this.users)
     return {userId,count:this.users.length,allUser:this.users};
   }
 
@@ -87,17 +87,19 @@ export class Quiz {
   public removeUser(userId:string){
     this.users = this.users.filter((user)=>user.id !==userId)
     this.user_count()
-    console.log("removing user")
+    // console.log("removing user")
 
   }
 
   public start() {
     this.hasStarted = true;
     this.currentState = "CHANGE_PROBLEM";
-    const currentTimeMillis = Date.now();
-    this.problems[this.activeProblem]?.startTime == currentTimeMillis
-    console.log("hello baby",this.problems[this.activeProblem]?.startTime)
-    console.log("yoo",Date.now())
+    const currentTimeMillis = Date.now()
+    // console.log("yoo",Date.now())
+    const problem = this.problems[this.activeProblem]
+    if (!problem) return;
+
+    problem.startTime = currentTimeMillis
 
     const io = IoManager.getSocketInstance().io;
     if(this.problems[this.activeProblem]){
@@ -114,7 +116,7 @@ export class Quiz {
 
   public sendLeaderBoard() {
     this.currentState = "LEADERBOARD";
-    const getLeaderboard = this.users
+    const getLeaderboard = [...this.users]
       .sort((a, b) => ((a.points < b.points) ? 1 : -1))
       .splice(0, 20);
     IoManager.getSocketInstance().io.to(this.roomId).emit("currentStateQuiz", {
@@ -128,25 +130,26 @@ export class Quiz {
   }
 
   public next() {
-    console.log("Entered in next - quiz")
+    // console.log("Entered in next - quiz")
 
     const io = IoManager.getSocketInstance().io;
     this.currentState = "CHANGE_PROBLEM";
+    this.activeProblem++;
     const currentTimeMillis = Date.now()
-    console.log("yoo",Date.now())
-    const problem = this.problems[this.activeProblem]
+    // console.log("yoo",Date.now())
+    const problem = this.problems[this.activeProblem-1]
     if (!problem) return;
 
-    this.problems[this.activeProblem].startTime = currentTimeMillis 
-    console.log("hello baby",this.problems[this.activeProblem]?.startTime)
+    problem.startTime = currentTimeMillis
+
+    // console.log("hello baby",problem.startTime)
     console.log(this.problems)
-    if (this.problems[this.activeProblem]) {
+    if (this.problems[this.activeProblem-1]) {
       io.to(this.roomId).emit("currentStateQuiz", {
         state: this.currentStateQuiz(),
-        problem: this.problems[this.activeProblem],
+        problem: this.problems[this.activeProblem-1],
       });
-      console.log("Entered in next - quiz")
-      this.activeProblem++;
+      // console.log("Entered in next - quiz")
             
       setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
@@ -157,9 +160,9 @@ export class Quiz {
 
 
   public addProblem(data:any){
-    this.problems.push({...data,submission:[{problemId:data.problemId,userId:"",submitAnser:0,isCorrect:"dont know"}]
+    this.problems.push({...data,submission:[{problemId:"",userId:"",submitAnser:0,isCorrect:false}]
     ,startTime:0})
-    console.log("\n\n\nlksadjflkasjdflkjlasjdfkljsalkdf lkshadfkjhasldjkf\n\n\n",this.problems)
+    // console.log("\n\n\nlksadjflkasjdflkjlasjdfkljsalkdf lkshadfkjhasldjkf\n\n\n",this.problems)
     return "problem added"
 
   }
@@ -170,47 +173,54 @@ export class Quiz {
     submission: Number
   ) {
     const submissionTime = Date.now();
-    console.log("all problems",problemId)
+    // console.log("all problems",problemId)
     
     const isProblemExists = this.problems.find((x) => {
       return x.problemId.toString() === problemId.toString();
     });
-    console.log("enterd in quiz--------- submit",isProblemExists)
-
+    
     if (isProblemExists) {
       // const isProblemExists.submission
       const isExistingSubmission = isProblemExists.submission.find((x) => {
         return x.userId == userId;
       });
-
+      
       if (isExistingSubmission) {
+        console.log("user already submitted the answer")
         return;
       }
       isProblemExists.submission.push({
-        problemId,
-        userId,
+        problemId:problemId,
+        userId:userId,
         submitedAnswer: submission,
-        isCorrect: isProblemExists.answer == submission,
+        isCorrect: Number(isProblemExists.answer) === submission,
       });
+      
+      console.log("enterd in quiz--------- submit",isProblemExists)
+      console.log("enterd in quiz users - ",this.users)
 
+      
+      if(isProblemExists.submission.find((x)=>x.userId===userId)?.isCorrect){
+        console.log("correct answer by user id -- ", userId)
+        const user = this.users.find((x) => {
+          return x.id == userId;
+        });
 
-      const user = this.users.find((x) => {
-        return x.id == userId;
-      });
-      if (user) {
-        console.log("user init",user)
+        if (user) {
+          user.points += Number(1000 - ((submissionTime - isProblemExists.startTime) * 600) /(TIME_DURATION_SEC * 1000));
+          console.log("user init",user)
+        }
+        else{
+          console.log("user doesn't exist")
+        }
         
-
-        user.points += 1000 - ((submissionTime - isProblemExists.startTime) * 600) /(TIME_DURATION_SEC * 1000);
-
         // an formula for rewarding points based on the the time they take to submit the answer
-          console.log("add points to users id in quiz",isProblemExists.startTime)
-      }
+      } 
     }
   }
 
   public user_count(){
-    console.log("entered in user_count from backend")
+    // console.log("entered in user_count from backend")
     const io = IoManager.getSocketInstance().io;
     io.to(this.roomId).emit("user_count",{ // Broadcasting the message to everyone
       count:this.users.length,
