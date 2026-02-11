@@ -23,7 +23,8 @@ export interface QuizProblem {
     options: { // Note: Your backend uses 'option' (singular) or 'options' depending on the file
       id: number;
       title: string;
-    }[]; 
+    }[];
+
   }
 
 
@@ -188,14 +189,7 @@ export default function UserJoin() {
             }}
             timer={20} // Optional - defaults to 20 if not provided
             />
-
         }
-            // return <Quiz problem= {
-            // problemId: "sdf",
-            // title: "asdf",
-            // image: "asdf",
-            // options: [{id: "sdaf", title: "asdf"}],
-            // } onsubmit={}/>
 
         if (currentState === "LEADERBOARD") {
             return <Leaderboard players={leaderboard} currentUserId={userId1}/>

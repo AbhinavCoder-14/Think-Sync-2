@@ -106,13 +106,15 @@ export class QuizManager {
     return quiz;
   }
 
-  public submit(
+  public  submit(
     userId: string,
     roomId: string,
     problemId: string,
-    submission: AllowedSubmission,
+    submission: Number,
   ) {
+    console.log("enterd in quiz submit")
     this.getQuiz(roomId)?.submit(userId, problemId, submission);
+
   }
 
   // i think this will go to quiz.ts

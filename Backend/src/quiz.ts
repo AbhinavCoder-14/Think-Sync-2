@@ -15,7 +15,7 @@ export interface Problem {
   problemId: string;
   title: string;
   image: string;
-  answer: AllowedSubmission;
+  answer: number;
   startTime: number;
   options: {
     id: number;
@@ -23,9 +23,9 @@ export interface Problem {
   }[];
   submission: {
     problemId: string;
-    userId: string;
-    submitedAnswer: AllowedSubmission;
-    isCorrect: boolean;
+    userId: string | any;
+    submitedAnswer: Number | any;
+    isCorrect: boolean | any;
   }[];
 }
 
@@ -94,7 +94,11 @@ export class Quiz {
   public start() {
     this.hasStarted = true;
     this.currentState = "CHANGE_PROBLEM";
-    this.problems[this.activeProblem]?.startTime == new Date().getTime();
+    const currentTimeMillis = Date.now();
+    this.problems[this.activeProblem]?.startTime == currentTimeMillis
+    console.log("hello baby",this.problems[this.activeProblem]?.startTime)
+    console.log("yoo",Date.now())
+
     const io = IoManager.getSocketInstance().io;
     if(this.problems[this.activeProblem]){
       io.to(this.roomId).emit("currentStateQuiz", {
@@ -128,6 +132,13 @@ export class Quiz {
 
     const io = IoManager.getSocketInstance().io;
     this.currentState = "CHANGE_PROBLEM";
+    const currentTimeMillis = Date.now()
+    console.log("yoo",Date.now())
+    const problem = this.problems[this.activeProblem]
+    if (!problem) return;
+
+    this.problems[this.activeProblem].startTime = currentTimeMillis 
+    console.log("hello baby",this.problems[this.activeProblem]?.startTime)
     console.log(this.problems)
     if (this.problems[this.activeProblem]) {
       io.to(this.roomId).emit("currentStateQuiz", {
@@ -136,8 +147,7 @@ export class Quiz {
       });
       console.log("Entered in next - quiz")
       this.activeProblem++;
-      
-      
+            
       setTimeout(() => this.sendLeaderBoard(), TIME_DURATION_SEC * 1000);
     } else {
       this.currentState = "QUIZ_ENDED";
@@ -147,28 +157,30 @@ export class Quiz {
 
 
   public addProblem(data:any){
-    this.problems.push(data)
-    return "problem added"
+    this.problems.push({...data,submission:[{problemId:data.problemId,userId:"",submitAnser:0,isCorrect:"dont know"}]
+    ,startTime:0})
     console.log("\n\n\nlksadjflkasjdflkjlasjdfkljsalkdf lkshadfkjhasldjkf\n\n\n",this.problems)
+    return "problem added"
 
   }
-
-
-
 
   public submit(
     userId: string,
     problemId: string,
-    submission: AllowedSubmission
+    submission: Number
   ) {
-    const submissionTime = new Date().getTime();
+    const submissionTime = Date.now();
+    console.log("all problems",problemId)
+    
     const isProblemExists = this.problems.find((x) => {
-      x.problemId == problemId;
+      return x.problemId.toString() === problemId.toString();
     });
+    console.log("enterd in quiz--------- submit",isProblemExists)
 
     if (isProblemExists) {
+      // const isProblemExists.submission
       const isExistingSubmission = isProblemExists.submission.find((x) => {
-        x.userId == userId;
+        return x.userId == userId;
       });
 
       if (isExistingSubmission) {
@@ -181,14 +193,18 @@ export class Quiz {
         isCorrect: isProblemExists.answer == submission,
       });
 
+
       const user = this.users.find((x) => {
-        x.id == userId;
+        return x.id == userId;
       });
       if (user) {
-        user.points +=
-          1000 -
-          ((submissionTime - isProblemExists.startTime) * 600) /
-            (TIME_DURATION_SEC * 1000); // an formula for rewarding points based on the the time they take to submit the answer
+        console.log("user init",user)
+        
+
+        user.points += 1000 - ((submissionTime - isProblemExists.startTime) * 600) /(TIME_DURATION_SEC * 1000);
+
+        // an formula for rewarding points based on the the time they take to submit the answer
+          console.log("add points to users id in quiz",isProblemExists.startTime)
       }
     }
   }

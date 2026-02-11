@@ -120,7 +120,7 @@ export class UserManager {
     socket.on("submit", (data) => {
       const userId = data.userId;
       const problemId = data.problemId;
-      const submission = (data.submission);
+      const submission = Number(data.submission);
       const roomId = data.roomId;
 
       // if (
@@ -133,6 +133,7 @@ export class UserManager {
       //   console.log(data)
       //   return;
       // }
+      console.log("submission is -- ", data)
       this.quizManager.submit(userId, roomId, problemId, submission);
     });
 
