@@ -33,16 +33,25 @@
 
 
 
-## ScreenShots
+## 📸 Screenshots
 
-[](quizz-app/public/adminRoomCreate.png)
-[](quizz-app/public/adminDashBoard.png)
-[](quizz-app/public/room.png)
-[](quizz-app/public/waitingRoom.png)
-[](quizz-app/public/question.png)
-[](quizz-app/public/leade4rbaord.png)
+### Admin Room Creation
+![Admin Room Create](quizz-app/public/adminRoomCreate.png)
 
+### Admin Dashboard
+![Admin Dashboard](quizz-app/public/adminDashBoard.png)
 
+### Quiz Room
+![Room](quizz-app/public/room.png)
+
+### Waiting Room
+![Waiting Room](quizz-app/public/waitingRoom.png)
+
+### Question Screen
+![Question](quizz-app/public/question.png)
+
+### Leaderboard
+![Leaderboard](quizz-app/public/leade4rbaord.png)
 
 
 
