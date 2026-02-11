@@ -1,43 +1,109 @@
 version: '3.9'
 
 services:
-  backend:
-    build: ./Backend
-    container_name: think-sync-backend
-    ports:
-      - "3000:3000"
-
-  frontend:
-    build: ./quizz-app
-    container_name: think-sync-frontend
-    ports:
-      - "8080:3000"
-
-    depends_on:
-      - backend
-
-  db:
+  # PostgreSQL Database (for NextAuth only)
+  postgres:
     image: postgres:15-alpine
-    container_name: Think-Sync-2
-    restart: always
+    container_name: think-sync-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: quiz-admin-2
-      POSTGRES_PASSWORD: mypassword-2
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mypassword-2}
       POSTGRES_DB: quiz-admin-db-2
+      POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quiz-admin-2 -d quiz-admin-db-2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - think-sync-network
 
+  # Redis (for quiz state and sessions)
   redis:
-    image: redis:7
-    container_name: redis
+    image: redis:7-alpine
+    container_name: think-sync-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - think-sync-network
+
+  # Backend (Socket.io + Express)
+  backend:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    container_name: think-sync-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: quizz-app/Dockerfile
+    container_name: think-sync-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://quiz-admin-2:${POSTGRES_PASSWORD:-mypassword-2}@postgres:5432/quiz-admin-db-2
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:4000}
+      LOCAL_DEVELOPMENT: ${LOCAL_DEVELOPMENT:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  think-sync-network:
+    driver: bridge
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local

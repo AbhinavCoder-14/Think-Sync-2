@@ -1,20 +1,51 @@
-# Use Node LTS
-FROM node:24-alpine
+# Build stage
+FROM node:20-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY Backend/package*.json ./
+COPY Backend/tsconfig.json ./
 
-# Install dependencies
+# Install ALL dependencies (including devDependencies for TypeScript compilation)
 RUN npm install
 
-# Copy rest of the backend code
-COPY . .
+# Copy source code
+COPY Backend/src ./src
 
-# Expose backend port (change if different)
-EXPOSE 3000
+# Build TypeScript to JavaScript
+RUN npx tsc
 
-# Start backend
-CMD ["npm", "start"]
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Copy package files
+COPY Backend/package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy built JavaScript files from build stage
+COPY --from=build /app/dist ./dist
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Change ownership
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Expose the backend port
+EXPOSE 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+  CMD node -e "require('http').get('http://localhost:4000/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))" || exit 1
+
+# Start the application
+CMD ["node", "dist/index.js"]
