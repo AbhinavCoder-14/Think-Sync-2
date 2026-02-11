@@ -1,0 +1,20 @@
+# Use Node LTS
+FROM node:24-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy rest of the backend code
+COPY . .
+
+# Expose backend port (change if different)
+EXPOSE 3000
+
+# Start backend
+CMD ["npm", "start"]

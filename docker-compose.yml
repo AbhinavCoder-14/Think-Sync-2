@@ -1,5 +1,21 @@
-version: '3.8'
+version: '3.9'
+
 services:
+  backend:
+    build: ./Backend
+    container_name: think-sync-backend
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./quizz-app
+    container_name: think-sync-frontend
+    ports:
+      - "8080:3000"
+
+    depends_on:
+      - backend
+
   db:
     image: postgres:15-alpine
     container_name: Think-Sync-2

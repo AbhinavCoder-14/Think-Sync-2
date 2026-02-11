@@ -33,6 +33,16 @@
 
 
 
+## ScreenShots
+
+[](quizz-app/public/adminRoomCreate.png)
+[](quizz-app/public/adminDashBoard.png)
+[](quizz-app/public/room.png)
+[](quizz-app/public/waitingRoom.png)
+[](quizz-app/public/question.png)
+[](quizz-app/public/leade4rbaord.png)
+
+
 
 
 
