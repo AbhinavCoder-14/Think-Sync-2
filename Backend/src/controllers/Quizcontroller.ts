@@ -60,7 +60,7 @@ export class QuizManager {
     }
     console.log("enterd in add User");
     return this.getQuiz(roomId)?.addUser(name); // user will get added to the perticular roomId quiz
-  }
+  }                
   // This getQuiz will return the roomId array of quiz which is the different object of Quiz is created by the admin in addQuizbyAdmin
 
   public removeUser(roomId: string, userId: string) {
@@ -71,7 +71,7 @@ export class QuizManager {
     this.getQuiz(roomId)?.removeUser(userId);
   }
 
-  public getQuiz(roomId: string) {
+  public  getQuiz(roomId: string) {
     return (
       this.quizes.find((x) => {
         return x.roomId === roomId;
@@ -115,7 +115,7 @@ export class QuizManager {
     console.log("enterd in quiz submit")
     this.getQuiz(roomId)?.submit(userId, problemId, submission);
 
-  }
+  }   
 
   // i think this will go to quiz.ts
   public async addQuizbyAdmin(roomId: string) {

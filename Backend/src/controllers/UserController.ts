@@ -12,7 +12,7 @@ interface User {
 const ADMIN_ROOM_KEY = "1234";
 
 export class UserManager {
-  public users = new Map<string,{ roomId: string; userId: string }>(); // useless
+  public users = new Map<string,{ roomId: string; userId: string }>(); 
   private isAdmin: boolean;
 
   private quizManager;
