@@ -56,10 +56,10 @@ io.on("connection",(socket:Socket)=>{
       userManager.addUser(socket)
 
 
-      socket.on("disconnect",()=>{
-        console.log("user disconected",socket.id)
-        userManager.disconnectUser(socket)
-      })
+      // socket.on("disconnect",()=>{
+      //   console.log("user disconected",socket.id)
+      //   userManager.disconnectUser(socket)
+      // })
     })
 
 
@@ -94,6 +94,10 @@ app.post("/api/get_instance",(req,res)=>{
     res.json({status:"notification have been sent"})
 })
 
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.post("/api/create_room",(req,res)=>{
 
