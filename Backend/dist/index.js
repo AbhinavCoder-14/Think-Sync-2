@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Load environment variables first
 import express from 'express';
 import cors from "cors";
 import http from 'http';
@@ -14,7 +15,14 @@ const redis_test = async () => {
     console.log("redis saying, ", value);
 };
 redis_test();
-app.use(cors());
+// Validate required environment variables
+if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+    console.warn('⚠️  WARNING: ADMIN_PASSWORD not set. Using default value.');
+}
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true
+}));
 app.use(express.json());
 const server = http.createServer(app);
 // Singleton instance is created for socket.io server
@@ -33,10 +41,6 @@ io.on("connection", (socket) => {
     });
     userManager.addAdminInit(socket);
     userManager.addUser(socket);
-    // socket.on("disconnect",()=>{
-    //   console.log("user disconected",socket.id)
-    //   userManager.disconnectUser(socket)
-    // })
 });
 app.post("/api/get_instance", (req, res) => {
     const message = req.body.message;
@@ -47,6 +51,9 @@ app.post("/api/get_instance", (req, res) => {
         timeStamp: new Date(),
     });
     res.json({ status: "notification have been sent" });
+});
+app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
 });
 app.post("/api/create_room", (req, res) => {
     const { credentials } = req.body;

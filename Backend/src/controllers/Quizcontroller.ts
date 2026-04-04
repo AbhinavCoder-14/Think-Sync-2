@@ -18,9 +18,15 @@ let globalProblemIndex = 0;
 
 export class QuizManager {
   private quizes: Quiz[];
+  private quizMap: Map<string, Quiz>; // O(1) room lookup instead of O(n) array search
+  private static readonly ACTIVE_ROOMS_SET_KEY = "rooms:active";
 
   constructor() {
     this.quizes = [];
+    this.quizMap = new Map();
+    
+    // Rehydrate active rooms from Redis on server startup
+    setTimeout(() => this.rehydrateActiveRooms(), 1000);
   }
 
   public start(roomId: string) {
@@ -42,12 +48,12 @@ export class QuizManager {
     console.log("Entered in next - quiz");
   }
 
-  public async currentStateQuiz(roomId: string) {
+  public currentStateQuiz(roomId: string) {
     const quiz = this.getQuiz(roomId);
-    const exists = await this.getQuizInRedis(roomId);
     if (quiz) {
       return quiz.currentStateQuiz();
     }
+    return null;
   }
 
   // public user_count(roomId:string){
@@ -71,14 +77,9 @@ export class QuizManager {
     this.getQuiz(roomId)?.removeUser(userId);
   }
 
-  public  getQuiz(roomId: string) {
-    return (
-      this.quizes.find((x) => {
-        return x.roomId === roomId;
-      }) ?? null
-    );
-
-    // return array of unique roomId quiz array
+  public getQuiz(roomId: string) {
+    // O(1) lookup using Map instead of O(n) array.find()
+    return this.quizMap.get(roomId) ?? null;
   }
   // for persisting the data in RAM
   public async getQuizInRedis(roomId: string) {
@@ -103,6 +104,8 @@ export class QuizManager {
     quiz.setStatus(state.status);
 
     this.quizes.push(quiz);
+    this.quizMap.set(roomId, quiz); // ✅ Add to map for O(1) lookup
+    console.log(`✓ Rehydrated room from Redis: ${roomId}`);
     return quiz;
   }
 
@@ -117,6 +120,37 @@ export class QuizManager {
 
   }   
 
+  // Rehydrate all active rooms from Redis on server startup
+  private async rehydrateActiveRooms() {
+    try {
+      const roomIds = await redis.smembers(QuizManager.ACTIVE_ROOMS_SET_KEY);
+      let rehydratedCount = 0;
+
+      for (const roomId of roomIds) {
+        if (!roomId) continue; // Skip if roomId is empty
+        
+        // Skip if already loaded in memory
+        if (this.quizMap.has(roomId)) continue;
+        
+        const state = await this.getQuizInRedis(roomId);
+        if (state) {
+          await this.loadQuizInMemory(roomId);
+          rehydratedCount++;
+        } else {
+          // Room key expired but stale id remained in the set.
+          await redis.srem(QuizManager.ACTIVE_ROOMS_SET_KEY, roomId);
+        }
+      }
+      
+      if (rehydratedCount > 0) {
+        console.log(`✓ Server startup: Rehydrated ${rehydratedCount} active room(s) from Redis`);
+      }
+    } catch (error) {
+      console.error('❌ Error rehydrating rooms from Redis:', error);
+    }
+  }
+
+
   // i think this will go to quiz.ts
   public async addQuizbyAdmin(roomId: string) {
     if (this.getQuiz(roomId)) {
@@ -130,11 +164,24 @@ export class QuizManager {
 
     const quiz = new Quiz(roomId);
     this.quizes.push(quiz);
-    console.log("quiz created")
-    await redis.hset(`room:${roomId}`, {
-      status: "waiting",
-      currentQuestion: "0",
-    });
+    this.quizMap.set(roomId, quiz); // ✅ Add to map for O(1) lookup
+    
+    console.log("✓ Quiz created:", roomId);
+    
+    // Persist to Redis with 4-hour TTL (quiz max duration)
+    try {
+      await redis.hset(`room:${roomId}`, {
+        status: "waiting",
+        currentQuestion: "0",
+        createdAt: new Date().toISOString(),
+      });
+      await redis.sadd(QuizManager.ACTIVE_ROOMS_SET_KEY, roomId);
+      // Set TTL to 4 hours (14400 seconds)
+      await redis.expire(`room:${roomId}`, 14400);
+      console.log(`✓ Room persisted to Redis with 4-hour TTL: ${roomId}`);
+    } catch (error) {
+      console.error(`❌ Failed to persist room to Redis: ${roomId}`, error);
+    }
   }
 
   public user_count_admin(roomId: string) {

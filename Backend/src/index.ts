@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Load environment variables first
 
 import express from 'express';
 import cors from "cors"
@@ -25,8 +26,15 @@ redis_test()
 
 
 
+// Validate required environment variables
+if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+  console.warn('⚠️  WARNING: ADMIN_PASSWORD not set. Using default value.');
+}
 
-app.use(cors())
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+}))
 app.use(express.json())
 
 const server:http.Server = http.createServer(app)
@@ -55,11 +63,6 @@ io.on("connection",(socket:Socket)=>{
       userManager.addAdminInit(socket)
       userManager.addUser(socket)
 
-
-      // socket.on("disconnect",()=>{
-      //   console.log("user disconected",socket.id)
-      //   userManager.disconnectUser(socket)
-      // })
     })
 
 

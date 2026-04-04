@@ -9,7 +9,13 @@ interface User {
   socket: Socket;
 }
 
-const ADMIN_ROOM_KEY = "1234";
+// Load admin password from environment variables (default to "1234" for development)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
+
+// Log warning if using default password in production
+if (process.env.NODE_ENV === 'production' && process.env.ADMIN_PASSWORD === undefined) {
+  console.warn('⚠️  SECURITY WARNING: Using default admin password "1234". Set ADMIN_PASSWORD env var for production.');
+}
 
 export class UserManager {
   public users = new Map<string,{ roomId: string; userId: string }>(); 
@@ -39,16 +45,19 @@ export class UserManager {
 
   addAdminInit(socket: Socket) {
     socket.on("join_admin", (data) => {
-      if (data.password !== ADMIN_ROOM_KEY) {
+      // Validate admin password against environment variable
+      if (data.password !== ADMIN_PASSWORD) {
+        socket.emit("auth_failed", { error: "Invalid admin password" });
+        console.warn("⚠️ Failed admin login attempt from socket:", socket.id);
         return;
       }
 
       this.isAdmin = true;
-      console.log("admin connection init");
+      console.log("✓ Admin authenticated successfully");
       // const userslength = this.quizManager.
 
       // socket.emit("user_count",{
-        
+
       // })
 
     });
