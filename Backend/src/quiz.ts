@@ -232,6 +232,10 @@ export class Quiz {
     return this.users.length
   }
 
+  public getUserCount() {
+    return this.users.length;
+  }
+
   public currentStateQuiz() {
     if (this.currentState === "NOT STARTED") {
       return {

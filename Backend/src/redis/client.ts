@@ -1,6 +1,7 @@
 // Backend/src/redis/client.ts
 import { Redis } from "ioredis";
 import dotenv from "dotenv";
+import { logger } from "../logger.js";
 dotenv.config();
 
 export const redis = new Redis({
@@ -9,9 +10,9 @@ export const redis = new Redis({
 });
 
 redis.on("connect", () => {
-  console.log("Redis connected on", process.env.REDIS_HOST || "localhost");
+  logger.info({ redisHost: process.env.REDIS_HOST || "localhost" }, "redis connected");
 });
 
 redis.on("error", (err) => {
-  console.log("Redis error", err);
+  logger.error({ err }, "redis error");
 });

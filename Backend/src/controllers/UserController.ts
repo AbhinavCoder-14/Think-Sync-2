@@ -19,14 +19,14 @@ if (process.env.NODE_ENV === 'production' && process.env.ADMIN_PASSWORD === unde
 
 export class UserManager {
   public users = new Map<string,{ roomId: string; userId: string }>(); 
-  private isAdmin: boolean;
+  private adminSockets: Set<string>;
 
   private quizManager;
 
   constructor() { 
     // this.users = []; // useless
     this.quizManager = new QuizManager();
-    this.isAdmin = false;
+    this.adminSockets = new Set();
   }
 
   addUser(socket: Socket) {
@@ -37,6 +37,18 @@ export class UserManager {
     return this.quizManager.getRoomRoute(roomId);
   }
 
+  public async allocateRoomRoute(roomId: string) {
+    return this.quizManager.allocateRoomRoute(roomId);
+  }
+
+  public getActiveRoomCount() {
+    return this.quizManager.getActiveRoomCount();
+  }
+
+  public getTotalUsersCount() {
+    return this.quizManager.getTotalUsersCount();
+  }
+
   public disconnectUser(socket:Socket){
     const user = this.users.get(socket.id)
 
@@ -45,6 +57,8 @@ export class UserManager {
       this.users.delete(socket.id)
       console.log("removing user - UserControl")
     }
+
+    this.adminSockets.delete(socket.id);
   }
 
   addAdminInit(socket: Socket) {
@@ -56,7 +70,8 @@ export class UserManager {
         return;
       }
 
-      this.isAdmin = true;
+      this.adminSockets.add(socket.id);
+      socket.emit("admin_auth_ok", { status: "ok" });
       console.log("✓ Admin authenticated successfully");
       // const userslength = this.quizManager.
 
@@ -67,7 +82,7 @@ export class UserManager {
     });
     
       socket.on("create_quiz", async (data) => {
-        if(!this.isAdmin){
+        if(!this.adminSockets.has(socket.id)){
           return "unautherized for this event access"
         }
         await this.quizManager.addQuizbyAdmin(data.roomId);
@@ -84,7 +99,7 @@ export class UserManager {
       });
 
       socket.on("add_problems", (data) => {
-        if(!this.isAdmin){
+        if(!this.adminSockets.has(socket.id)){
           return "unautherized for this event access"
         }
         this.quizManager.addProblem(data.roomId, data.problem);
@@ -92,7 +107,7 @@ export class UserManager {
       });
 
       socket.on("next", (data) => {
-        if(!this.isAdmin){
+        if(!this.adminSockets.has(socket.id)){
           return "unautherized for this event access"
         }
         this.quizManager.next(data.roomId);

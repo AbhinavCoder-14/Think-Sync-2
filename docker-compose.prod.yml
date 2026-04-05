@@ -41,7 +41,7 @@ services:
     environment:
       PORT: 4000
       INSTANCE_ID: backend-1
-      BACKEND_INSTANCES: backend-1,backend-2
+      BACKEND_INSTANCES: backend-1,backend-2,backend-3
       PUBLIC_GATEWAY_URL: ${PUBLIC_GATEWAY_URL:-http://localhost:4000}
       NODE_ENV: production
       REDIS_HOST: redis
@@ -71,7 +71,7 @@ services:
     environment:
       PORT: 4000
       INSTANCE_ID: backend-2
-      BACKEND_INSTANCES: backend-1,backend-2
+      BACKEND_INSTANCES: backend-1,backend-2,backend-3
       PUBLIC_GATEWAY_URL: ${PUBLIC_GATEWAY_URL:-http://localhost:4000}
       NODE_ENV: production
       REDIS_HOST: redis
@@ -79,6 +79,37 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-in-production}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    depends_on:
+      redis:
+        condition: service_healthy
+    expose:
+      - "4000"
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:4000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  backend-3:
+    build:
+      context: .
+      dockerfile: Backend/dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      INSTANCE_ID: backend-3
+      BACKEND_INSTANCES: backend-1,backend-2,backend-3
+      PUBLIC_GATEWAY_URL: ${PUBLIC_GATEWAY_URL:-http://localhost:4000}
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-in-production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       redis:
         condition: service_healthy
@@ -104,6 +135,8 @@ services:
       backend-1:
         condition: service_healthy
       backend-2:
+        condition: service_healthy
+      backend-3:
         condition: service_healthy
     networks:
       - think-sync-network
@@ -145,6 +178,67 @@ services:
       - "3000:3000"
     networks:
       - think-sync-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      backend-1:
+        condition: service_healthy
+      backend-2:
+        condition: service_healthy
+      backend-3:
+        condition: service_healthy
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  loki:
+    image: grafana/loki:3.2.1
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports:
+      - "3100:3100"
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    restart: unless-stopped
+    command: ["-config.file=/etc/promtail/config.yml"]
+    volumes:
+      - ./infra/promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks:
+      - think-sync-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9080/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   think-sync-network:

@@ -59,7 +59,7 @@ export const dummyProblems: Problem[] = [
 ];
 
 export default function Create() {
-  const { socket }: any = useSocket()
+  const { socket, connectToRoom }: any = useSocket()
   const [roomId, setRoomId] = useState<string | null>(null);
   const [liveCount, setLiveCount] = useState<number>(0);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -105,32 +105,77 @@ export default function Create() {
     setHasGenerated(true);
   }
 
-  const createRoom = () => {
+  const createRoom = async () => {
     setIsCreatingRoom(true);
     const newRoomId = crypto.randomUUID();
-    
-    if (session?.user.role === "admin") {
-      const ADMIN_ROOM_KEY = "1234"
-      if (socket) {
-        socket.emit("join_admin", {
-          password: ADMIN_ROOM_KEY,
-        })
-        socket.emit("create_quiz", {
-          roomId: newRoomId
-        })
 
-        setRoomId(newRoomId)
-
-        // Use the generated questions (which are actually hardcoded)
-        const questionsToUse = hasGenerated ? generatedQuestions : dummyProblems;
-        socket.emit("add_problems", {
-          roomId: newRoomId,
-          problem: JSON.stringify(questionsToUse)
-        })
+    try {
+      if (session?.user.role !== "admin" || !socket) {
+        throw new Error("Unauthorized admin action");
       }
+
+      const gatewayUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+      const routeResponse = await fetch(`${gatewayUrl}/api/admin/allocate-room`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomId: newRoomId }),
+      });
+
+      if (!routeResponse.ok) {
+        throw new Error("Failed to allocate room route");
+      }
+
+      const route = await routeResponse.json();
+      const routedSocket = await connectToRoom(route);
+
+      const ADMIN_ROOM_KEY = "1234";
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Admin auth timeout"));
+        }, 5000);
+
+        const onAuthOk = () => {
+          cleanup();
+          resolve();
+        };
+
+        const onAuthFailed = () => {
+          cleanup();
+          reject(new Error("Admin auth failed"));
+        };
+
+        const cleanup = () => {
+          clearTimeout(timeout);
+          routedSocket.off("admin_auth_ok", onAuthOk);
+          routedSocket.off("auth_failed", onAuthFailed);
+        };
+
+        routedSocket.once("admin_auth_ok", onAuthOk);
+        routedSocket.once("auth_failed", onAuthFailed);
+        routedSocket.emit("join_admin", { password: ADMIN_ROOM_KEY });
+      });
+
+      routedSocket.emit("create_quiz", {
+        roomId: newRoomId,
+      });
+
+      // Use the generated questions (which are actually hardcoded)
+      const questionsToUse = hasGenerated ? generatedQuestions : dummyProblems;
+      routedSocket.emit("add_problems", {
+        roomId: newRoomId,
+        problem: JSON.stringify(questionsToUse),
+      });
+
+      setRoomId(newRoomId);
+    } catch (error) {
+      console.error("Failed to create room with routed admin socket", error);
+      alert("Failed to create room. Please try again.");
+    } finally {
+      setIsCreatingRoom(false);
     }
-    
-    setIsCreatingRoom(false);
   }
 
   const copyRoomId = () => {

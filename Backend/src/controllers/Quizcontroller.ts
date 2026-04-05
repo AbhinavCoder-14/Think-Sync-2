@@ -125,6 +125,20 @@ export class QuizManager {
     };
   }
 
+  public async allocateRoomRoute(roomId: string) {
+    const existingRoute = await this.getRoomRoute(roomId);
+    if (existingRoute) {
+      return existingRoute;
+    }
+
+    const instanceId = await this.assignRoomToInstance(roomId);
+    return {
+      roomId,
+      instanceId, 
+      socketPath: this.getSocketPathForInstance(instanceId),
+    };
+  }
+
   private async assignRoomToInstance(roomId: string) {
     const instancePool = this.getInstancePool();
 
@@ -223,18 +237,20 @@ export class QuizManager {
     
     // Persist to Redis with 4-hour TTL (quiz max duration)
     try {
+      const allocatedRoute = await this.allocateRoomRoute(roomId);
       await redis.hset(`room:${roomId}`, {
         status: "waiting",
         currentQuestion: "0",
         createdAt: new Date().toISOString(),
+        instanceId: allocatedRoute.instanceId,
+        socketPath: allocatedRoute.socketPath,
       });
       await redis.sadd(QuizManager.ACTIVE_ROOMS_SET_KEY, roomId);
       // Set TTL to 4 hours (14400 seconds)
       await redis.expire(`room:${roomId}`, 14400);
-      await this.assignRoomToInstance(roomId);
-      console.log(`✓ Room persisted to Redis with 4-hour TTL: ${roomId}`);
+      console.log(` Room persisted to Redis with 4-hour TTL: ${roomId}`);
     } catch (error) {
-      console.error(`❌ Failed to persist room to Redis: ${roomId}`, error);
+      console.error(` Failed to persist room to Redis: ${roomId}`, error);
     }
   }
 
@@ -244,6 +260,14 @@ export class QuizManager {
       return null;
     }
     return quiz.user_count();
+  }
+
+  public getActiveRoomCount() {
+    return this.quizMap.size;
+  }
+
+  public getTotalUsersCount() {
+    return this.quizes.reduce((acc, quiz) => acc + quiz.getUserCount(), 0);
   }
 
 public addProblem(roomId: string, problem: any) {

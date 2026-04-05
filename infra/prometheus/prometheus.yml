@@ -9,3 +9,4 @@ scrape_configs:
       - targets:
           - backend-1:4000
           - backend-2:4000
+          - backend-3:4000
