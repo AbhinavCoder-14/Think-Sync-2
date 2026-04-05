@@ -73,6 +73,20 @@ app.get("/metrics", (_req, res) => {
         `quiz_backend_instance_info{instance_id="${instanceId}"} 1`,
     ].join("\n") + "\n");
 });
+app.get("/api/room-route/:roomId", async (req, res) => {
+    const { roomId } = req.params;
+    const route = await userManager.getRoomRoute(roomId);
+    if (!route) {
+        res.status(404).json({ error: "Room not found" });
+        return;
+    }
+    res.json({
+        roomId: route.roomId,
+        instanceId: route.instanceId,
+        socketPath: route.socketPath,
+        gatewayUrl: process.env.PUBLIC_GATEWAY_URL || process.env.CORS_ORIGIN || "http://localhost:4000",
+    });
+});
 app.post("/api/create_room", (req, res) => {
     const { credentials } = req.body;
     const io = IoManager.getSocketInstance().io;

@@ -59,7 +59,7 @@ export const dummyProblems: Problem[] = [
 ];
 
 export default function Create() {
-  const socket: any = useSocket()
+  const { socket }: any = useSocket()
   const [roomId, setRoomId] = useState<string | null>(null);
   const [liveCount, setLiveCount] = useState<number>(0);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);

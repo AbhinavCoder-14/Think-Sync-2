@@ -20,6 +20,21 @@ export class QuizManager {
   private quizes: Quiz[];
   private quizMap: Map<string, Quiz>; // O(1) room lookup instead of O(n) array search
   private static readonly ACTIVE_ROOMS_SET_KEY = "rooms:active";
+  private static readonly ROOM_INSTANCE_KEY_PREFIX = "room:";
+  private static readonly ROOM_INSTANCE_COUNTER_KEY = "rooms:rr:index";
+
+  private getInstancePool(): string[] {
+    const configuredPool = (process.env.BACKEND_INSTANCES || "backend-local")
+      .split(",")
+      .map((instance) => instance.trim())
+      .filter(Boolean);
+
+    return configuredPool.length > 0 ? configuredPool : [process.env.INSTANCE_ID || "backend-local"];
+  }
+
+  private getSocketPathForInstance(instanceId: string) {
+    return `/ws/${instanceId}/socket.io`;
+  }
 
   constructor() {
     this.quizes = [];
@@ -90,7 +105,47 @@ export class QuizManager {
     return {
       status: data?.status,
       currentQuestion: Number(data.currentQuestion),
+      instanceId: data?.instanceId,
     };
+  }
+
+  public async getRoomRoute(roomId: string) {
+    const roomState = await redis.hgetall(`room:${roomId}`);
+
+    if (!roomState || Object.keys(roomState).length === 0) {
+      return null;
+    }
+
+    const instanceId = roomState.instanceId || process.env.INSTANCE_ID || "backend-local";
+
+    return {
+      roomId,
+      instanceId,
+      socketPath: this.getSocketPathForInstance(instanceId),
+    };
+  }
+
+  private async assignRoomToInstance(roomId: string) {
+    const instancePool = this.getInstancePool();
+
+    if (instancePool.length === 1) {
+      const instanceId = instancePool[0] || process.env.INSTANCE_ID || "backend-local";
+      await redis.hset(`room:${roomId}`, {
+        instanceId,
+        socketPath: this.getSocketPathForInstance(instanceId),
+      });
+      return instanceId;
+    }
+
+    const nextIndex = await redis.incr(QuizManager.ROOM_INSTANCE_COUNTER_KEY);
+    const instanceId = instancePool[(nextIndex - 1) % instancePool.length] || process.env.INSTANCE_ID || "backend-local";
+
+    await redis.hset(`room:${roomId}`, {
+      instanceId,
+      socketPath: this.getSocketPathForInstance(instanceId),
+    });
+
+    return instanceId;
   }
 
   // Rehydration of quiz from redis
@@ -176,6 +231,7 @@ export class QuizManager {
       await redis.sadd(QuizManager.ACTIVE_ROOMS_SET_KEY, roomId);
       // Set TTL to 4 hours (14400 seconds)
       await redis.expire(`room:${roomId}`, 14400);
+      await this.assignRoomToInstance(roomId);
       console.log(`✓ Room persisted to Redis with 4-hour TTL: ${roomId}`);
     } catch (error) {
       console.error(`❌ Failed to persist room to Redis: ${roomId}`, error);

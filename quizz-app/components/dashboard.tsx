@@ -5,7 +5,7 @@ import { useSocket } from "@/app/context/SocketContext"
 
 
 export const Dashboard = ({roomId,count1}:{roomId:string,count1:Number}) =>{
-    const socket:any = useSocket()
+    const { socket }: any = useSocket()
     const [liveCount,setLiveCount] = useState(0)
 
 

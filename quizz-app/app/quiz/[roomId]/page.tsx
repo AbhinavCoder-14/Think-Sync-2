@@ -4,7 +4,7 @@ import { useSocket } from "@/app/context/SocketContext";
 
 async function Quiz({ params }:{params:{roomId:string}}) {
 
-    const socket:any = useSocket()
+    const { socket }: any = useSocket()
     
 
 

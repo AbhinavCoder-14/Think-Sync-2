@@ -14,7 +14,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
 
 // Log warning if using default password in production
 if (process.env.NODE_ENV === 'production' && process.env.ADMIN_PASSWORD === undefined) {
-  console.warn('⚠️  SECURITY WARNING: Using default admin password "1234". Set ADMIN_PASSWORD env var for production.');
+  console.warn('SECURITY WARNING: Using default admin password "1234". Set ADMIN_PASSWORD env var for production.');
 }
 
 export class UserManager {
@@ -33,6 +33,10 @@ export class UserManager {
     this.UserOperations(socket);
   }
 
+  public async getRoomRoute(roomId: string) {
+    return this.quizManager.getRoomRoute(roomId);
+  }
+
   public disconnectUser(socket:Socket){
     const user = this.users.get(socket.id)
 
@@ -48,7 +52,7 @@ export class UserManager {
       // Validate admin password against environment variable
       if (data.password !== ADMIN_PASSWORD) {
         socket.emit("auth_failed", { error: "Invalid admin password" });
-        console.warn("⚠️ Failed admin login attempt from socket:", socket.id);
+        console.warn(" Failed admin login attempt from socket:", socket.id);
         return;
       }
 
@@ -67,10 +71,15 @@ export class UserManager {
           return "unautherized for this event access"
         }
         await this.quizManager.addQuizbyAdmin(data.roomId);
+        const route = await this.quizManager.getRoomRoute(data.roomId);
         console.log("quiz created======")
         socket.emit("user_count_admin",{
           count : this.quizManager.user_count_admin(data.roomId)
         })
+        socket.emit("room_assigned", {
+          roomId: data.roomId,
+          ...route,
+        });
         console.log("create quiz called ", data.roomId);
       });
 

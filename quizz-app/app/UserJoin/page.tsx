@@ -49,13 +49,14 @@ export interface QuizProblem {
 
 
 export default function UserJoin() {
-    const socket: any = useSocket()
+    const { socket, connectToRoom }: any = useSocket()
     const [roomId, setRoomId] = useState<string>("")
     const [username, setUsername] = useState<string>("")
     const [isJoined, setIsJoined] = useState<boolean>(false) // Changed convention to camelCase
     const [userId1, setUserId1] = useState<string>("")
     const [userCount, setUserCount] = useState<number>(0)
     const [allUserList, setallUserList] = useState<any[]>([])
+    const [pendingJoin, setPendingJoin] = useState<{ name: string; roomId: string } | null>(null)
 
     const [currentState, setCurrentState] = useState<string>("NOT STARTED")
 
@@ -125,15 +126,39 @@ export default function UserJoin() {
 
     }, [socket])
 
-    const handleJoin = () => {
+    useEffect(() => {
+        if (!socket || !pendingJoin || !socket.connected) {
+            return;
+        }
+
+        socket.emit("join", pendingJoin)
+        setPendingJoin(null)
+    }, [socket, pendingJoin])
+
+    const handleJoin = async () => {
         if (!roomId || !username || !socket) {
             alert("Please enter both name and room ID");
             return;
         }
-        socket.emit("join", {
-            name: username,
-            roomId: roomId
-        })
+
+        try {
+            const gatewayUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000"
+            const response = await fetch(`${gatewayUrl}/api/room-route/${roomId}`)
+
+            if (!response.ok) {
+                throw new Error("Room route not available yet")
+            }
+
+            const route = await response.json()
+            await connectToRoom(route)
+            setPendingJoin({
+                name: username,
+                roomId: roomId
+            })
+        } catch (error) {
+            console.error("Failed to route room join", error)
+            alert("Unable to resolve room route. Please try again.")
+        }
 
         // socket.on("user_count", (data: any) => {
         //     console.log("enterd in user_count")
