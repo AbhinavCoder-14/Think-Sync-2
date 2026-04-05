@@ -9,6 +9,7 @@ import { Socket } from 'socket.io';
 import { redis } from "./redis/client.js";
 const app = express();
 const port = process.env.PORT || 4000;
+const instanceId = process.env.INSTANCE_ID || "backend-local";
 const redis_test = async () => {
     await redis.set("value", "hello");
     const value = await redis.get("value");
@@ -54,6 +55,23 @@ app.post("/api/get_instance", (req, res) => {
 });
 app.get("/health", (req, res) => {
     res.json({ status: "ok" });
+});
+app.get("/ready", async (_req, res) => {
+    try {
+        await redis.ping();
+        res.json({ status: "ready", instanceId });
+    }
+    catch (error) {
+        res.status(503).json({ status: "not-ready", instanceId });
+    }
+});
+app.get("/metrics", (_req, res) => {
+    res.type("text/plain");
+    res.send([
+        `quiz_backend_uptime_seconds ${Math.floor(process.uptime())}`,
+        `quiz_backend_connected_sockets ${IoManager.getSocketInstance().io.engine.clientsCount}`,
+        `quiz_backend_instance_info{instance_id="${instanceId}"} 1`,
+    ].join("\n") + "\n");
 });
 app.post("/api/create_room", (req, res) => {
     const { credentials } = req.body;

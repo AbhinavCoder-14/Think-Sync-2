@@ -127,9 +127,7 @@ export class QuizManager {
       let rehydratedCount = 0;
 
       for (const roomId of roomIds) {
-        if (!roomId) continue; // Skip if roomId is empty
-        
-        // Skip if already loaded in memory
+        if (!roomId) continue;
         if (this.quizMap.has(roomId)) continue;
         
         const state = await this.getQuizInRedis(roomId);
@@ -143,10 +141,10 @@ export class QuizManager {
       }
       
       if (rehydratedCount > 0) {
-        console.log(`✓ Server startup: Rehydrated ${rehydratedCount} active room(s) from Redis`);
+        console.log(`Server startup: Rehydrated ${rehydratedCount} active room(s) from Redis`);
       }
     } catch (error) {
-      console.error('❌ Error rehydrating rooms from Redis:', error);
+      console.error(' Error rehydrating rooms from Redis:', error);
     }
   }
 
