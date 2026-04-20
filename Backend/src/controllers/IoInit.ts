@@ -37,3 +37,73 @@ export class IoManager {
 
 
 
+
+
+
+
+
+
+
+// import {Server} from "socket.io"
+
+// export class IoManager2{
+
+//   public static instance: IoManager2
+//   public _io: Server
+
+
+
+//   private constructor(server:http.Server){
+//     this._io = new Server(server,{
+//       cors:{
+//         origin:"*",
+//         methods:["GET","POST"]
+//       }
+//     })
+
+
+    
+
+//   }
+
+
+//   public static getInstance(server:http.Server){
+//     if (!this.instance){
+//       if(!server){
+//         return "server is not available"
+//       }
+//       this.instance = new IoManager2(server)
+      
+//     }
+//     return this.instance
+
+
+//   }
+
+//   public get io(){
+//     return this._io
+//   }
+
+
+
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

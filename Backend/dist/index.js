@@ -136,13 +136,13 @@ app.post("/api/admin/allocate-room", async (req, res) => {
         gatewayUrl: process.env.PUBLIC_GATEWAY_URL || process.env.CORS_ORIGIN || "http://localhost:4000",
     });
 });
-app.post("/api/create_room", (req, res) => {
-    const { credentials } = req.body;
-    const io = IoManager.getSocketInstance().io;
-    let roomId = crypto.randomUUID();
-    console.log(roomId);
-    res.json({ "roomId": roomId });
-});
+// app.post("/api/create_room",(req,res)=>{
+//     const {credentials} = req.body
+//     const io = IoManager.getSocketInstance().io
+//     let roomId  = crypto.randomUUID();
+//     console.log(roomId)
+//     res.json({"roomId":roomId})
+// })
 server.listen(port, () => {
     logger.info({ port, instanceId }, "server started");
 });
